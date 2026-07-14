@@ -35,7 +35,7 @@ Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötig
 Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem Rechner (z. B. einem Raspberry Pi oder Mini-PC) im Netzwerk des Feuerwehrhauses. 
 
 * **Dauerhafte Verbindung:** Das System ist rund um die Uhr sicher mit dem Server der Leitstelle verbunden und lauscht auf Alarme für die eigene Feuerwehr.
-* **Intelligente Übersetzung:** Sobald ein Alarm eingeht, bereitet das System den rohen Leitstellentext auf. Kryptische Abkürzungen (z.B. "T VU" oder "BMA") werden in verständliche Sätze (wie "Technischer Einsatz, Verkehrsunfall" oder "Brandmeldeanlage") übersetzt.
+* **Intelligente Übersetzung:** Sobald ein Alarm eingeht, bereitet das System den rohen Leitstellentext auf. Abkürzungen (z.B. "T VU" oder "BMA") werden in verständliche Sätze (wie "Technischer Einsatz, Verkehrsunfall" oder "Brandmeldeanlage") übersetzt.
 * **Sprachsynthese:** Der übersetzte Text wird in Echtzeit in eine hochwertige Sprachausgabe (TTS) umgewandelt und an die Hausanlage geschickt.
 
 ---
