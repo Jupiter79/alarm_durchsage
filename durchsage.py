@@ -896,9 +896,9 @@ def start_mdns(cfg_live):
         from zeroconf import ServiceInfo, Zeroconf
         import socket
         
-        dns_name = cfg_live.get("server", {}).get("dns_name", "alarm-server")
+        dns_name = cfg_live.get("server", {}).get("dns_name", "alarmdurchsage")
         if not dns_name:
-            dns_name = "alarm-server"
+            dns_name = "alarmdurchsage"
             
         port = int(cfg_live.get("ui", {}).get("port", 5000))
         

@@ -7,7 +7,7 @@
     ],
     "server": {
         "host": "0.0.0.0",
-        "dns_name": "alarm-server"
+        "dns_name": "alarmdurchsage"
     },
     "ui": {
         "port": 80,

@@ -47,7 +47,7 @@ Das System verfügt über eine grafische Oberfläche (Webseite). Du musst absolu
 ### 🌐 So greifst du auf das System zu:
 1. Öffne auf einem beliebigen Gerät (PC, Tablet oder Smartphone), das mit dem **Feuerwehr-Netzwerk (WLAN/LAN)** verbunden ist, einen Internetbrowser (z.B. Chrome, Safari, Edge).
 2. Gib oben in die Adresszeile folgende Adresse ein:
-   👉 **http://alarm-server.local**
+   👉 **http://alarmdurchsage.local**
    *(Sollte das nicht klappen, kann alternativ die direkte IP-Adresse des Geräts im Netzwerk eingegeben werden).*
 3. Du landest auf der Anmeldeseite. Das Passwort lautet standardmäßig:
    👉 **`admin`**
