@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarmdurchsage Server</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Login View -->
+    <div id="view-login" class="view-section active">
+        <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+            <div class="glass-card" id="login-container">
+                <h2 class="text-center mb-4 text-primary">Alarmdurchsage Server Login</h2>
+                <form id="form-login">
+                    <div class="mb-3">
+                        <label class="form-label">Passwort</label>
+                        <input type="password" class="form-control" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Einloggen</button>
+                    <div id="login-error" class="text-danger mt-2 text-center" style="display:none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password View -->
+    <div id="view-change-password" class="view-section">
+        <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+            <div class="glass-card" id="login-container">
+                <h2 class="text-center mb-4 text-warning">Erster Login</h2>
+                <p class="text-muted text-center mb-4">Bitte ändere das Standardpasswort (122), um fortzufahren.</p>
+                <form id="form-change-password">
+                    <div class="mb-3">
+                        <label class="form-label">Neues Passwort</label>
+                        <input type="password" class="form-control" id="new-password" required minlength="3">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Passwort bestätigen</label>
+                        <input type="password" class="form-control" id="new-password-confirm" required minlength="3">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Passwort speichern</button>
+                    <div id="cp-error" class="text-danger mt-2 text-center" style="display:none;"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="view-app" class="view-section">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="#"><i class="fa-solid fa-fire-extinguisher me-2"></i>Alarmdurchsage
+                    Server</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-link-item"><a class="nav-link active" href="#"
+                                onclick="switchTab('dashboard')">Dashboard</a></li>
+                        <li class="nav-link-item"><a class="nav-link" href="#"
+                                onclick="switchTab('config')">Konfiguration</a></li>
+                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('logs')">Historie</a>
+                        </li>
+                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('gongs')">Gongs</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center">
+                        <span id="status-badge" class="badge-status error me-3">Getrennt</span>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <!-- Dashboard Tab -->
+            <div id="tab-dashboard" class="tab-content active">
+                <div class="alert alert-danger mb-4 shadow-sm" id="crit-error-alert"
+                    style="display:none; font-size: 1.1rem; border-left: 5px solid #dc3545;">
+                    <h4 class="alert-heading fw-bold"><i class="fa-solid fa-circle-xmark me-2"></i>KRITISCHER FEHLER
+                    </h4>
+                    <p id="crit-error-msg" class="mb-0">Verbindung fehlgeschlagen.</p>
+                </div>
+
+                <div class="alert alert-danger mb-4 shadow-sm" id="ffmpeg-warning"
+                    style="display:none; font-size: 1.1rem; border-left: 5px solid #dc3545;">
+                    <h4 class="alert-heading fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>FEHLER:
+                        FFmpeg nicht installiert!</h4>
+                    <p>Für die Audio-Verarbeitung und Lautstärkeanhebung wird die Software <strong>FFmpeg</strong>
+                        zwingend benötigt. Aktuell ist diese nicht auf deinem System installiert.</p>
+                    <hr>
+
+                    <div id="ffmpeg-cmd-win" style="display:none;">
+                        <p class="mb-0"><strong>So behebst du das Problem unter Windows:</strong> Öffne die
+                            Eingabeaufforderung (cmd) oder PowerShell als Administrator und führe folgenden Befehl aus:
+                        </p>
+                        <code
+                            class="d-block mt-2 mb-2 p-2 bg-dark text-light rounded user-select-all fs-6">winget install "FFmpeg (Essentials Build)"</code>
+                    </div>
+
+                    <div id="ffmpeg-cmd-lin" style="display:none;">
+                        <p class="mb-0"><strong>So behebst du das Problem unter Linux (z.B. Raspberry Pi):</strong>
+                            Öffne das Terminal und führe folgenden Befehl aus:</p>
+                        <code
+                            class="d-block mt-2 mb-2 p-2 bg-dark text-light rounded user-select-all fs-6">sudo apt-get update && sudo apt-get install ffmpeg -y</code>
+                    </div>
+
+                    <p class="mb-0 mt-3"><strong>Starte das Programm (und ggf. den Computer) danach neu.</strong></p>
+                </div>
+
+                <div class="layout-container">
+
+                    <!-- Main Content Left -->
+                    <div class="main-content">
+                        <div class="glass-card">
+                            <h2 class="mb-1">Durchsage senden</h2>
+                            <p class="text-muted mb-4">Wird im Feuerwehrhaus (oder wo konfiguriert) abgespielt</p>
+
+                            <form id="form-announce">
+                                <div class="mb-4 d-flex gap-3 align-items-center">
+                                    <label class="form-label mb-0" style="min-width: 120px;">Gong Auswahl</label>
+                                    <select id="announce-gong" class="form-select w-50" onchange="updateFormFields()">
+                                        <option value="0" selected>Keinen</option>
+                                    </select>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="previewGong()"
+                                        title="Vorhören"><i class="fa-solid fa-play"></i></button>
+                                </div>
+
+                                <!-- Textbereich (nur bei Freitext) -->
+                                <div id="text-container" class="mb-4">
+                                    <label class="form-label">Freitext Durchsage</label>
+                                    <textarea class="form-control" id="announce-text" rows="4"
+                                        placeholder="Achtung, dies ist eine Testdurchsage!"></textarea>
+                                </div>
+
+                                <!-- Einsatz-Container (nur bei Gong 1,2,3) -->
+                                <div id="einsatz-container" style="display:none;" class="mb-4">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Stichwort <span class="required">*</span></label>
+                                            <input type="text" id="announce-stichwort" class="form-control"
+                                                placeholder="z.B. T VU">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Schlagwort <span class="required">*</span></label>
+                                            <input type="text" id="announce-schlagwort" class="form-control"
+                                                placeholder="z.B. Verkehrsunfall">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Straße <span class="required">*</span></label>
+                                            <input type="text" id="announce-strasse" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ort <span class="required">*</span></label>
+                                            <input type="text" id="announce-ort" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Gemeinde <span class="required">*</span></label>
+                                            <input type="text" id="announce-gemeinde" class="form-control">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label">Zusatzinfo</label>
+                                            <input type="text" id="announce-zusatzinfo" class="form-control">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" id="submit-announce-btn"
+                                        class="btn btn-primary px-4">Durchsage
+                                        durchführen</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Right -->
+                    <div class="sidebar-control">
+                        <div class="control-box">
+                            <button type="button" class="halt-action-tile mb-4" onclick="clearQueue()">
+                                <i class="fa-solid fa-circle-stop"></i>
+                                <span>Durchsage HALT</span>
+                            </button>
+
+                            <h2 class="control-heading">Alarmdurchsage Modus</h2>
+                            <form id="alarm-mode-form">
+                                <div class="alarm-selector">
+                                    <label>
+                                        <input type="radio" id="all" name="alarm_mode" value="full">
+                                        <div class="option all">
+                                            <i class="fa-solid fa-volume-high"></i>
+                                            <span>Alles</span>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <input type="radio" id="gong_only" name="alarm_mode" value="gong_only">
+                                        <div class="option gong">
+                                            <i class="fa-solid fa-bell"></i>
+                                            <span>Nur Gong</span>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <input type="radio" id="speech_only" name="alarm_mode" value="speech_only">
+                                        <div class="option speech">
+                                            <i class="fa-solid fa-microphone"></i>
+                                            <span>Nur Durchsage</span>
+                                        </div>
+                                    </label>
+                                    <label>
+                                        <input type="radio" id="mute" name="alarm_mode" value="mute">
+                                        <div class="option mute">
+                                            <i class="fa-solid fa-volume-xmark"></i>
+                                            <span>Stumm</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="control-box mt-4">
+                            <h2 class="control-heading">System & Wartung</h2>
+                            <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="downloadSyslog()">
+                                <i class="fa-solid fa-file-lines me-2"></i>Programmlog (30 Tage)
+                            </button>
+                            <button type="button" class="btn btn-outline-danger w-100" onclick="restartSystem()">
+                                <i class="fa-solid fa-power-off me-2"></i>System Neustarten
+                            </button>
+                        </div>
+                    </div>
+
+                </div> <!-- /layout-container -->
+            </div>
+
+            <!-- Config Tab -->
+            <div id="tab-config" class="tab-content" style="display:none;">
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>Einstellungen</h3>
+                        <button class="btn btn-success" onclick="saveConfig()">Speichern</button>
+                    </div>
+
+                    <form id="form-config">
+                        <!-- Config Editor is injected via JS -->
+                        <div id="config-editor-container"></div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Logs Tab -->
+            <div id="tab-logs" class="tab-content" style="display:none;">
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3>Historie (Letzte 365 Tage)</h3>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadLogs()">Aktualisieren</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-history table-hover" id="logs-table">
+                            <thead>
+                                <tr>
+                                    <th>Zeitpunkt</th>
+                                    <th>Typ / Gong</th>
+                                    <th>Adresse</th>
+                                    <th>Text/Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Gongs Tab -->
+            <div id="tab-gongs" class="tab-content" style="display:none;">
+                <div class="glass-card mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3>Verfügbare Gongs</h3>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="loadGongs()">Aktualisieren</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="gongs-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Kategorie</th>
+                                    <th>Aktionen</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h4 class="mb-3">Neuen Gong hinzufügen</h4>
+                    <form id="form-upload-gong">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label class="form-label">Name</label>
+                                <input type="text" class="form-control" id="new-gong-name" required
+                                    placeholder="z.B. Probealarm">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Kategorie</label>
+                                <select class="form-select" id="new-gong-alarm">
+                                    <option value="false" selected>Durchsage</option>
+                                    <option value="true">Einsatz / Alarm</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Audio-Datei (MP3)</label>
+                                <input class="form-control" type="file" id="new-gong-file" accept=".mp3" required>
+                            </div>
+                            <div class="col-12 text-end mt-3">
+                                <button type="submit" class="btn btn-primary px-4"><i
+                                        class="fa-solid fa-upload me-2"></i>Hochladen</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center mt-5">
+            <div class="container">
+                <p class="mb-1 fw-bold">System entwickelt von Sergio Huainigg (FF Spittal/Drau).</p>
+                <p class="mb-0" style="font-size: 0.75rem;">© 2026. <strong>Haftungsausschluss:</strong> Die Software
+                    wird "wie besehen" zur Verfügung gestellt, ohne jegliche ausdrückliche oder stillschweigende
+                    Garantie. Für Schäden oder verpasste Alarmierungen wird keine Haftung übernommen.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Audio Player for Preview -->
+    <audio id="audio-preview" style="display:none;"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
