@@ -6,17 +6,14 @@ Willkommen beim Alarmdurchsage-System! Dieses Dokument erklärt in einfachen Wor
 
 ## 👨‍🔧 Instandhaltung & Kontakt
 
-Dieses System wird betreut und instandgehalten von **Sergio Huainigg**. 
-Falls es Probleme gibt, etwas nicht so funktioniert, wie es soll, oder du Fragen zur Bedienung hast, kannst du dich jederzeit gerne direkt an mich wenden:
-
-📧 **E-Mail-Adresse:** [Bitte hier deine E-Mail-Adresse eintragen]
+Auszufüllen
 
 ---
 
 ## ℹ️ Worum geht es?
 
 Dieses System sorgt für die automatische Alarmdurchsage im Feuerwehrhaus. 
-Wenn ein echter Einsatz über die Leitstelle (FWEI / Leitstellenverbund Kärnten) hereinkommt, reagiert das System sofort und völlig automatisch:
+Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ) hereinkommt, reagiert das System sofort und völlig automatisch:
 
 1. **Aufmerksamkeit:** Es spielt sofort einen lauten **Gong** über die Lautsprecheranlage ab.
 2. **Information:** Es liest mit einer klaren, natürlichen Computerstimme die **Einsatzdaten** vor (z. B. Einsatzart, Adresse, Zusatzinformationen).
