@@ -50,7 +50,7 @@ Das System verfügt über eine grafische Oberfläche (Webseite). Du musst absolu
    👉 **http://alarmdurchsage.local**
    *(Sollte das nicht klappen, kann alternativ die direkte IP-Adresse des Geräts im Netzwerk eingegeben werden).*
 3. Du landest auf der Anmeldeseite. Das Passwort lautet standardmäßig:
-   👉 **`admin`**
+   👉 **`122`**
    *(Das System speichert die Anmeldung, sodass du dich nach einem Neustart nicht immer wieder neu einloggen musst).*
 
 ### 🛠️ Was kannst du auf der Webseite machen?

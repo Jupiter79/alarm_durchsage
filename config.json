@@ -11,7 +11,7 @@
     },
     "ui": {
         "port": 80,
-        "password": "admin",
+        "password": "122",
         "password_changed": false,
         "alarm_mode": "full"
     },

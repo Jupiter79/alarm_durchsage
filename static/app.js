@@ -172,14 +172,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Internet / WLAN Logic ---
-    $('input[name="internet_mode"]').on('change', function() {
+    $('input[name="internet_mode"]').on('change', function () {
         if (this.value === 'wlan') {
             $('#wlan-settings-container').slideDown();
-            $('#label-mode-wlan').css({background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)'});
+            $('#label-mode-wlan').css({ background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)' });
             $('#label-mode-wlan .text-muted').css('color', 'rgba(255,255,255,0.8)').removeClass('text-muted');
-            $('#label-mode-lan').css({background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0'});
+            $('#label-mode-lan').css({ background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0' });
             $('#label-mode-lan small').addClass('text-muted').css('color', '');
-            
+
             // Require fields
             $('#wifi-ssid').prop('required', true);
             // Password is required unless we pre-filled an active connection (handled in loadNetworkStatus)
@@ -187,9 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
             scanWifi();
         } else {
             $('#wlan-settings-container').slideUp();
-            $('#label-mode-lan').css({background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)'});
+            $('#label-mode-lan').css({ background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)' });
             $('#label-mode-lan .text-muted').css('color', 'rgba(255,255,255,0.8)').removeClass('text-muted');
-            $('#label-mode-wlan').css({background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0'});
+            $('#label-mode-wlan').css({ background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0' });
             $('#label-mode-wlan small').addClass('text-muted').css('color', '');
 
             // Remove required
@@ -505,7 +505,7 @@ function renderConfigEditor() {
 
     // UI
     html += '<div class="config-group"><h5 class="text-primary mb-3">🔒 Web-Interface</h5>';
-    html += createInput('Login-Passwort', 'ui.password', currentConfig.ui?.password || 'admin', 'password', 'Das Passwort, um diese Oberfläche zu öffnen (Standard: admin).');
+    html += createInput('Login-Passwort', 'ui.password', currentConfig.ui?.password || '122', 'password', 'Das Passwort, um diese Oberfläche zu öffnen.');
     html += '</div>';
 
     // Connection
@@ -862,7 +862,7 @@ async function restartSystem() {
     }
 }
 
-window.scanWifi = async function() {
+window.scanWifi = async function () {
     const select = document.getElementById('wifi-ssid');
     const prevValue = select.value;
     select.innerHTML = '<option value="">Suche Netzwerke...</option>';
@@ -879,7 +879,7 @@ window.scanWifi = async function() {
                     select.innerHTML += `<option value="${n}">${n}</option>`;
                     if (n === prevValue) optionExists = true;
                 });
-                
+
                 // Restore previous selection if it's still available or was custom set
                 if (prevValue && !optionExists) {
                     select.innerHTML += `<option value="${prevValue}">${prevValue}</option>`;
@@ -899,7 +899,7 @@ window.scanWifi = async function() {
     }
 };
 
-window.loadNetworkStatus = async function() {
+window.loadNetworkStatus = async function () {
     try {
         const res = await fetch('/api/network/status');
         if (res.ok) {
@@ -910,22 +910,22 @@ window.loadNetworkStatus = async function() {
                     wlanRadio.checked = true;
                     $(wlanRadio).trigger('change');
                 }
-                
+
                 const select = document.getElementById('wifi-ssid');
                 select.innerHTML = `<option value="${data.ssid}">${data.ssid}</option>`;
                 select.value = data.ssid;
-                
+
                 await scanWifi();
-                
+
                 let badge = document.getElementById('current-wifi-badge');
-                if(!badge) {
+                if (!badge) {
                     badge = document.createElement('span');
                     badge.id = 'current-wifi-badge';
                     badge.className = 'badge bg-success ms-2';
                     badge.innerHTML = 'Aktuell verbunden';
                     document.querySelector('label[for="wifi-ssid"]')?.appendChild(badge) || document.getElementById('wifi-ssid').parentElement.querySelector('label').appendChild(badge);
                 }
-                
+
                 // Set password placeholder and remove required
                 const pwdInput = document.getElementById('wifi-password');
                 pwdInput.placeholder = '(Gespeichert - nur eingeben, um zu ändern)';
@@ -938,7 +938,7 @@ window.loadNetworkStatus = async function() {
                 }
                 let badge = document.getElementById('current-wifi-badge');
                 if (badge) badge.remove();
-                
+
                 const pwdInput = document.getElementById('wifi-password');
                 pwdInput.placeholder = 'Passwort für das gewählte Netzwerk';
                 pwdInput.required = true;

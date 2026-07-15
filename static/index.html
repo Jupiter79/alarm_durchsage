@@ -35,7 +35,7 @@
         <div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
             <div class="glass-card" id="login-container">
                 <h2 class="text-center mb-4 text-warning">Erster Login</h2>
-                <p class="text-muted text-center mb-4">Bitte ändere das Standardpasswort (admin), um fortzufahren.</p>
+                <p class="text-muted text-center mb-4">Bitte ändere das Standardpasswort (122), um fortzufahren.</p>
                 <form id="form-change-password">
                     <div class="mb-3">
                         <label class="form-label">Neues Passwort</label>
@@ -265,15 +265,18 @@
 
                     <div class="row mt-4">
                         <div class="col-md-6 mb-3">
-                            <label class="halt-action-tile w-100" id="label-mode-lan" style="height: auto; padding: 20px;">
+                            <label class="halt-action-tile w-100" id="label-mode-lan"
+                                style="height: auto; padding: 20px;">
                                 <input type="radio" name="internet_mode" value="lan" style="display:none;" checked>
                                 <i class="fa-solid fa-network-wired mb-2" style="font-size: 30px;"></i>
                                 <span class="d-block fw-bold fs-5">LAN (Kabel)</span>
-                                <small class="d-block mt-2 fw-normal" style="color: rgba(255,255,255,0.8);">Empfohlener Standard</small>
+                                <small class="d-block mt-2 fw-normal" style="color: rgba(255,255,255,0.8);">Empfohlener
+                                    Standard</small>
                             </label>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="halt-action-tile w-100" id="label-mode-wlan" style="height: auto; padding: 20px; background: #fff; color: var(--text-main); border-color: #e0e0e0;">
+                            <label class="halt-action-tile w-100" id="label-mode-wlan"
+                                style="height: auto; padding: 20px; background: #fff; color: var(--text-main); border-color: #e0e0e0;">
                                 <input type="radio" name="internet_mode" value="wlan" style="display:none;">
                                 <i class="fa-solid fa-wifi mb-2" style="font-size: 30px;"></i>
                                 <span class="d-block fw-bold fs-5">WLAN (Drahtlos)</span>
@@ -281,7 +284,7 @@
                             </label>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-4">
                         <div class="col-md-6">
                             <div class="card h-100 border-success">
@@ -302,7 +305,8 @@
                                     <ul class="mb-0">
                                         <li>Flexibel platzierbar (kein Kabel nötig)</li>
                                         <li>Kann durch Wände/Störquellen schwanken</li>
-                                        <li><strong class="text-danger">Achtung:</strong> Bei Router-Wechsel muss das neues Passwort eingegeben werden</li>
+                                        <li><strong class="text-danger">Achtung:</strong> Bei Router-Wechsel muss das
+                                            neues Passwort eingegeben werden</li>
                                     </ul>
                                 </div>
                             </div>
@@ -310,27 +314,36 @@
                     </div>
 
                     <div class="alert alert-danger mt-4" style="border-left: 5px solid #dc3545;">
-                        <h5 class="fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Wichtige Warnung beim WLAN-Wechsel</h5>
-                        <p class="mb-0">Wenn du zu WLAN wechselst und die eingegebenen Daten (Passwort/Netzwerkname) <strong>falsch oder ungültig</strong> sind, kann sich das System nicht mehr verbinden. <strong>In diesem Notfall musst du das Gerät wieder mit einem LAN-Kabel anstecken</strong>, um wieder auf diese Oberfläche zugreifen zu können!</p>
+                        <h5 class="fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Wichtige Warnung beim
+                            WLAN-Wechsel</h5>
+                        <p class="mb-0">Wenn du zu WLAN wechselst und die eingegebenen Daten (Passwort/Netzwerkname)
+                            <strong>falsch oder ungültig</strong> sind, kann sich das System nicht mehr verbinden.
+                            <strong>In diesem Notfall musst du das Gerät wieder mit einem LAN-Kabel anstecken</strong>,
+                            um wieder auf diese Oberfläche zugreifen zu können!</p>
                     </div>
 
                     <form id="form-internet" class="mt-4">
-                        <div id="wlan-settings-container" style="display:none; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
+                        <div id="wlan-settings-container"
+                            style="display:none; background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6;">
                             <h5 class="mb-3">WLAN Einstellungen</h5>
                             <div class="mb-3">
-                                <label class="form-label">Verfügbare Netzwerke <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="scanWifi()"><i class="fa-solid fa-rotate"></i> Suchen</button></label>
+                                <label class="form-label">Verfügbare Netzwerke <button type="button"
+                                        class="btn btn-sm btn-outline-secondary ms-2" onclick="scanWifi()"><i
+                                            class="fa-solid fa-rotate"></i> Suchen</button></label>
                                 <select id="wifi-ssid" class="form-select" disabled>
                                     <option value="">Wird gesucht...</option>
                                 </select>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">WLAN Passwort</label>
-                                <input type="password" id="wifi-password" class="form-control" placeholder="Passwort für das gewählte Netzwerk">
+                                <input type="password" id="wifi-password" class="form-control"
+                                    placeholder="Passwort für das gewählte Netzwerk">
                             </div>
                         </div>
 
                         <div class="text-end mt-4">
-                            <button type="submit" class="btn btn-primary px-4" id="btn-save-network"><i class="fa-solid fa-check me-2"></i>Netzwerk-Einstellung anwenden</button>
+                            <button type="submit" class="btn btn-primary px-4" id="btn-save-network"><i
+                                    class="fa-solid fa-check me-2"></i>Netzwerk-Einstellung anwenden</button>
                         </div>
                     </form>
                 </div>
