@@ -7,32 +7,24 @@ echo =========================================
 echo.
 
 :: 1. System-Pakete installieren mit Winget
-echo [1/4] Installiere System-Pakete (Git, Python, FFmpeg)...
-winget install -e --id Git.Git --accept-package-agreements --accept-source-agreements --silent
+echo [1/3] Installiere System-Pakete (Python, FFmpeg)...
 winget install -e --id Python.Python.3.11 --accept-package-agreements --accept-source-agreements --silent
 winget install -e --id Gyan.FFmpeg --accept-package-agreements --accept-source-agreements --silent
 
-:: PATH in dieser Session aktualisieren (damit git, py und ffmpeg sofort verfuegbar sind)
+:: PATH in dieser Session aktualisieren (damit py und ffmpeg sofort verfuegbar sind)
 echo Aktualisiere Umgebungsvariablen...
 for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%B"
 for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USR_PATH=%%B"
 set "PATH=%SYS_PATH%;%USR_PATH%;%PATH%"
 
-:: 2. Repository klonen
-echo.
-echo [2/4] Klone Repository...
-set "INSTALL_DIR=%USERPROFILE%\alarm_durchsage"
-if not exist "%INSTALL_DIR%" (
-    git clone https://github.com/Jupiter79/alarm_durchsage "%INSTALL_DIR%"
-) else (
-    echo Verzeichnis %INSTALL_DIR% existiert bereits.
-)
+:: 2. Arbeitsverzeichnis setzen
+cd /d "%~dp0"
+set "INSTALL_DIR=%cd%"
 
-cd /d "%INSTALL_DIR%"
 
 :: 3. Python-Pakete installieren
 echo.
-echo [3/4] Installiere Python-Abhaengigkeiten...
+echo [2/3] Installiere Python-Abhaengigkeiten...
 :: Versuche 'py' (Python Launcher), falls 'python' nicht im PATH ist
 py -m pip --version >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
@@ -46,7 +38,7 @@ if %ERRORLEVEL% EQU 0 (
 
 :: 4. Autostart einrichten
 echo.
-echo [4/4] Richte Autostart ein...
+echo [3/3] Richte Autostart ein...
 set "AUTOSTART_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "VBS_SCRIPT=%INSTALL_DIR%\start_alarm_durchsage.vbs"
 
