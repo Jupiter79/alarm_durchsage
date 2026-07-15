@@ -559,6 +559,13 @@ function renderConfigEditor() {
     html += createDictEditor('Adress-Sonderfälle bereinigen', 'text_processing.address_replacements', currentConfig.text_processing.address_replacements, 'Ähnlich wie Abkürzungen, greift aber NUR bei der Adresse! Z.B. "AS" durch "Anschlussstelle" oder ein Pfeil ">" durch "Fahrtrichtung".');
     html += '</div>';
 
+    // API & Webhook
+    html += '<div class="config-group"><h5 class="text-primary mb-3">🔗 API & Webhook</h5>';
+    html += '<p class="text-muted small">Die API-URL kann aufgerufen werden, um zu prüfen ob aktuell ein Einsatz läuft ("true" oder "false").</p>';
+    html += `<div class="mb-3"><label class="form-label">API-Status Link</label><div class="input-group"><input type="text" class="form-control" readonly value="${window.location.origin}/api/is_active"><button class="btn btn-outline-secondary" type="button" onclick="window.open('${window.location.origin}/api/is_active', '_blank')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div></div>`;
+    html += createInput('Webhook URL', 'webhook.url', currentConfig.webhook?.url || '', 'url', 'Diese URL wird 1x aufgerufen (GET), sobald eine Alarmierung (Einsatz oder Probe) stattfindet. Nützlich für Smart-Home Anbindungen.');
+    html += '</div>';
+
     container.innerHTML = html;
 }
 

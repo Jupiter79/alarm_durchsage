@@ -509,6 +509,18 @@ def process_alarm_logic(data_dict: dict):
     # 3. Wiederholungen planen
     if alerted:
         cfg_live = load_config()
+        
+        # Webhook Aufruf
+        webhook_url = cfg_live.get("webhook", {}).get("url", "")
+        if webhook_url:
+            def call_webhook(url):
+                try:
+                    logger.info(f"Rufe Webhook auf: {url}")
+                    requests.get(url, timeout=5)
+                except Exception as e:
+                    logger.error(f"Fehler beim Webhook-Aufruf: {e}")
+            threading.Thread(target=call_webhook, args=(webhook_url,), daemon=True).start()
+
         repeats = cfg_live.get("repeatAlert", []) 
         if repeats and isinstance(repeats, list):
             for minuten in repeats:
@@ -753,6 +765,13 @@ def api_restart():
         os.execv(sys.executable, ['python', os.path.abspath(__file__)])
     threading.Thread(target=do_restart, daemon=True).start()
     return {"status": "ok", "message": "Neustart eingeleitet..."}
+
+@app.get("/api/is_active")
+def api_is_active_mission():
+    dept_info = get_department_status_data()
+    if dept_info and dept_info.get("state") != 2:
+        return Response(content="true", media_type="text/plain")
+    return Response(content="false", media_type="text/plain")
 
 @app.get("/api/system_status", dependencies=[Depends(verify_session)])
 def api_system_status():

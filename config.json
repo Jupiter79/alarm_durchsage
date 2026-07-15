@@ -96,5 +96,8 @@
             "AS": "Anschlussstelle",
             "Km": "Kilometer"
         }
+    },
+    "webhook": {
+        "url": ""
     }
 }
