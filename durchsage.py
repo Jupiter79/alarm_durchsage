@@ -936,7 +936,9 @@ def api_network_connect(req: NetworkConnectRequest):
     if req.mode == "lan":
         if system == "Windows":
             try:
-                subprocess.check_call(['netsh', 'wlan', 'disconnect'], shell=True)
+                res = subprocess.run(['netsh', 'wlan', 'disconnect'], capture_output=True, text=True, encoding='cp850', errors='ignore')
+                if res.returncode != 0:
+                    raise Exception(res.stdout + res.stderr)
                 return {"status": "ok", "message": "WLAN getrennt. LAN wird verwendet."}
             except Exception as e:
                 raise HTTPException(status_code=500, detail=str(e))
@@ -981,9 +983,17 @@ def api_network_connect(req: NetworkConnectRequest):
                 profile_path = "temp_wifi_profile.xml"
                 with open(profile_path, "w", encoding="utf-8") as f:
                     f.write(xml_profile)
-                subprocess.check_call(['netsh', 'wlan', 'add', 'profile', f'filename={profile_path}'], shell=True)
+                
+                res_add = subprocess.run(['netsh', 'wlan', 'add', 'profile', f'filename={profile_path}'], capture_output=True, text=True, encoding='cp850', errors='ignore')
+                if res_add.returncode != 0:
+                    raise Exception(f"Profile add failed: {res_add.stdout} {res_add.stderr}")
+                    
                 os.remove(profile_path)
-                subprocess.check_call(['netsh', 'wlan', 'connect', f'name={req.ssid}'], shell=True)
+                
+                res_conn = subprocess.run(['netsh', 'wlan', 'connect', f'name={req.ssid}'], capture_output=True, text=True, encoding='cp850', errors='ignore')
+                if res_conn.returncode != 0:
+                    raise Exception(f"Connect failed: {res_conn.stdout} {res_conn.stderr}")
+                    
                 return {"status": "ok", "message": f"Verbinde mit {req.ssid}..."}
             except Exception as e:
                 if os.path.exists("temp_wifi_profile.xml"):

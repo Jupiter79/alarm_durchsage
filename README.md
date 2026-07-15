@@ -26,7 +26,7 @@ Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ
 Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötigt:
 * **Hardware:** Ein kleiner Rechner, am besten ein **Raspberry Pi** oder ein kompakter Mini-PC.
 * **Audio-Verbindung:** Ein Adapterkabel (meist **AUX auf Cinch**), um den Audioausgang (Kopfhöreranschluss) des Raspberry Pi/PCs direkt mit dem Verstärker bzw. der Lautsprecheranlage des Feuerwehrhauses zu verbinden.
-* **Netzwerk:** Für eine ausfallsichere und schnelle Verbindung zur Leitstelle sollte das Gerät im Idealfall immer über ein festes **LAN-Kabel** mit dem Netzwerk/Router verbunden sein. WLAN funktioniert auch, ist aber fehleranfälliger.
+* **Netzwerk (LAN & WLAN):** Das System unterstützt vollumfänglich sowohl **LAN (Kabel)** als auch **WLAN (Drahtlos)** für Windows und Linux. Direkt auf der Webseite findest du einen eigenen Tab "Internet", in dem du ganz bequem WLAN-Netzwerke in deiner Umgebung suchen, dich mit einem Passwort verbinden oder jederzeit zurück auf LAN wechseln kannst. Für eine ausfallsichere Verbindung im Feuerwehrhaus wird dennoch ein festes LAN-Kabel empfohlen.
 
 ---
 
