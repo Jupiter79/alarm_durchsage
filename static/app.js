@@ -170,6 +170,74 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- Internet / WLAN Logic ---
+    $('input[name="internet_mode"]').on('change', function() {
+        if (this.value === 'wlan') {
+            $('#wlan-settings-container').slideDown();
+            $('#label-mode-wlan').css({background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)'});
+            $('#label-mode-wlan .text-muted').css('color', 'rgba(255,255,255,0.8)').removeClass('text-muted');
+            $('#label-mode-lan').css({background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0'});
+            $('#label-mode-lan small').addClass('text-muted').css('color', '');
+            
+            // Require fields
+            $('#wifi-ssid').prop('required', true);
+            // Password is required unless we pre-filled an active connection (handled in loadNetworkStatus)
+            $('#wifi-password').prop('required', true);
+            scanWifi();
+        } else {
+            $('#wlan-settings-container').slideUp();
+            $('#label-mode-lan').css({background: 'var(--primary-color)', color: '#fff', borderColor: 'var(--primary-color)'});
+            $('#label-mode-lan .text-muted').css('color', 'rgba(255,255,255,0.8)').removeClass('text-muted');
+            $('#label-mode-wlan').css({background: '#fff', color: 'var(--text-main)', borderColor: '#e0e0e0'});
+            $('#label-mode-wlan small').addClass('text-muted').css('color', '');
+
+            // Remove required
+            $('#wifi-ssid, #wifi-password').prop('required', false);
+        }
+    });
+
+    if (document.getElementById('form-internet')) {
+        document.getElementById('form-internet').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const mode = document.querySelector('input[name="internet_mode"]:checked').value;
+            const ssid = document.getElementById('wifi-ssid').value;
+            const password = document.getElementById('wifi-password').value;
+
+            if (mode === 'wlan' && !ssid) {
+                alert('Bitte wähle ein WLAN-Netzwerk aus.');
+                return;
+            }
+
+            if (!confirm("Bist du sicher? Falsche WLAN-Daten können dazu führen, dass du die Verbindung verlierst!")) return;
+
+            const btn = document.getElementById('btn-save-network');
+            const oldText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Wende an...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/network/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ mode, ssid, password })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(data.message || 'Einstellung erfolgreich angewendet.');
+                } else {
+                    const err = await res.json();
+                    alert('Fehler: ' + (err.detail || 'Unbekannt'));
+                }
+            } catch (err) {
+                alert('Netzwerkfehler! Möglicherweise wurde die Verbindung durch den Wechsel kurz unterbrochen. Bitte warte einen Moment und lade die Seite neu.');
+            } finally {
+                btn.innerHTML = oldText;
+                btn.disabled = false;
+            }
+        });
+    }
 });
 
 async function checkAuth() {
@@ -240,6 +308,9 @@ function switchTab(tabId) {
     if (tabId === 'config') loadConfig();
     if (tabId === 'logs') loadLogs();
     if (tabId === 'gongs') loadGongs();
+    if (tabId === 'internet') {
+        loadNetworkStatus();
+    }
 }
 
 function showLoginError(msg) {
@@ -790,3 +861,90 @@ async function restartSystem() {
         }
     }
 }
+
+window.scanWifi = async function() {
+    const select = document.getElementById('wifi-ssid');
+    const prevValue = select.value;
+    select.innerHTML = '<option value="">Suche Netzwerke...</option>';
+    select.disabled = true;
+
+    try {
+        const res = await fetch('/api/network/wifi');
+        if (res.ok) {
+            const data = await res.json();
+            select.innerHTML = '';
+            let optionExists = false;
+            if (data.networks && data.networks.length > 0) {
+                data.networks.forEach(n => {
+                    select.innerHTML += `<option value="${n}">${n}</option>`;
+                    if (n === prevValue) optionExists = true;
+                });
+                
+                // Restore previous selection if it's still available or was custom set
+                if (prevValue && !optionExists) {
+                    select.innerHTML += `<option value="${prevValue}">${prevValue}</option>`;
+                }
+                if (prevValue) {
+                    select.value = prevValue;
+                }
+                select.disabled = false;
+            } else {
+                select.innerHTML = '<option value="">Keine Netzwerke gefunden</option>';
+            }
+        } else {
+            select.innerHTML = '<option value="">Fehler beim Suchen</option>';
+        }
+    } catch (e) {
+        select.innerHTML = '<option value="">Netzwerkfehler</option>';
+    }
+};
+
+window.loadNetworkStatus = async function() {
+    try {
+        const res = await fetch('/api/network/status');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.mode === 'wlan' && data.ssid) {
+                const wlanRadio = document.querySelector('input[name="internet_mode"][value="wlan"]');
+                if (wlanRadio) {
+                    wlanRadio.checked = true;
+                    $(wlanRadio).trigger('change');
+                }
+                
+                const select = document.getElementById('wifi-ssid');
+                select.innerHTML = `<option value="${data.ssid}">${data.ssid}</option>`;
+                select.value = data.ssid;
+                
+                await scanWifi();
+                
+                let badge = document.getElementById('current-wifi-badge');
+                if(!badge) {
+                    badge = document.createElement('span');
+                    badge.id = 'current-wifi-badge';
+                    badge.className = 'badge bg-success ms-2';
+                    badge.innerHTML = 'Aktuell verbunden';
+                    document.querySelector('label[for="wifi-ssid"]')?.appendChild(badge) || document.getElementById('wifi-ssid').parentElement.querySelector('label').appendChild(badge);
+                }
+                
+                // Set password placeholder and remove required
+                const pwdInput = document.getElementById('wifi-password');
+                pwdInput.placeholder = '(Gespeichert - nur eingeben, um zu ändern)';
+                pwdInput.required = false;
+            } else {
+                const lanRadio = document.querySelector('input[name="internet_mode"][value="lan"]');
+                if (lanRadio) {
+                    lanRadio.checked = true;
+                    $(lanRadio).trigger('change');
+                }
+                let badge = document.getElementById('current-wifi-badge');
+                if (badge) badge.remove();
+                
+                const pwdInput = document.getElementById('wifi-password');
+                pwdInput.placeholder = 'Passwort für das gewählte Netzwerk';
+                pwdInput.required = true;
+            }
+        }
+    } catch (e) {
+        console.error("Fehler beim Laden des Netzwerkstatus", e);
+    }
+};
