@@ -65,11 +65,22 @@ del "%SHORTCUT_SCRIPT%"
 
 echo.
 echo =========================================
-echo Installation erfolgreich abgeschlossen!
+echo Installation fast abgeschlossen!
 echo =========================================
-echo Der Service wird beim naechsten Neustart automatisch im Hintergrund gestartet.
+echo WICHTIG: Damit die installierten Programme (wie FFmpeg) richtig
+echo vom System erkannt werden, MUSS der PC einmal neu gestartet werden.
 echo.
-echo Um den Service JETZT zu starten, fuehre folgende Datei aus:
-echo %VBS_SCRIPT%
+echo Nach dem Neustart startet der Service automatisch im Hintergrund.
 echo.
-pause
+set /p RESTART="Moechtest du den PC jetzt neu starten? (J/N): "
+if /i "%RESTART%"=="J" (
+    echo Neustart wird eingeleitet...
+    shutdown /r /t 5
+) else (
+    echo.
+    echo Bitte vergiss nicht, den PC spaeter manuell neu zu starten!
+    echo Um den Service danach manuell zu testen, fuehre folgende Datei aus:
+    echo %VBS_SCRIPT%
+    echo.
+    pause
+)
