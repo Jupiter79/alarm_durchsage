@@ -7,11 +7,10 @@ echo =========================================
 echo.
 
 :: 1. System-Pakete installieren mit Winget
-echo [1/3] Installiere System-Pakete (Python, FFmpeg)...
+echo [1/4] Installiere System-Pakete (Python)...
 winget install -e --id Python.Python.3.11 --accept-package-agreements --accept-source-agreements --silent
-winget install -e --id Gyan.FFmpeg --accept-package-agreements --accept-source-agreements --silent
 
-:: PATH in dieser Session aktualisieren (damit py und ffmpeg sofort verfuegbar sind)
+:: PATH in dieser Session aktualisieren (damit py sofort verfuegbar ist)
 echo Aktualisiere Umgebungsvariablen...
 for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%B"
 for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USR_PATH=%%B"
@@ -24,7 +23,7 @@ set "INSTALL_DIR=%cd%"
 
 :: 3. Python-Pakete installieren
 echo.
-echo [2/3] Installiere Python-Abhaengigkeiten...
+echo [2/4] Installiere Python-Abhaengigkeiten...
 :: Versuche 'py' (Python Launcher), falls 'python' nicht im PATH ist
 py -m pip --version >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
@@ -34,11 +33,16 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 %PYTHON_CMD% -m pip install --upgrade pip
-%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart zeroconf
+%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart zeroconf static-ffmpeg
+
+:: 3b. FFmpeg lokal einrichten (100% verlaesslich, ohne PATH-Probleme)
+echo.
+echo [3/4] Richte FFmpeg lokal ein...
+%PYTHON_CMD% -c "import static_ffmpeg; static_ffmpeg.add_paths(); import shutil, os; shutil.copy(shutil.which('ffmpeg'), '.'); shutil.copy(shutil.which('ffprobe'), '.')" >nul 2>&1
 
 :: 4. Autostart einrichten
 echo.
-echo [3/3] Richte Autostart ein...
+echo [4/4] Richte Autostart ein...
 set "AUTOSTART_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "VBS_SCRIPT=%INSTALL_DIR%\start_alarm_durchsage.vbs"
 
