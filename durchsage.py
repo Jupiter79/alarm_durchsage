@@ -13,9 +13,11 @@ from datetime import datetime, timedelta
 from typing import Optional, Any, Dict, Union
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from contextlib import asynccontextmanager
 
 import subprocess
 import platform
+import xml.sax.saxutils
 
 import requests
 import socketio
@@ -59,7 +61,18 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(syslog_formatter)
 logger.addHandler(console_handler)
 
-app = FastAPI(title="Alarmdurchsage Server Web UI")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    cfg_live = load_config()
+    start_mdns(cfg_live)
+    yield
+    logger.info("Lifespan Shutdown: Beende mDNS und Audio...")
+    stop_mdns()
+    if pygame and pygame.mixer.get_init():
+        try: pygame.mixer.quit()
+        except: pass
+
+app = FastAPI(title="Alarmdurchsage Server Web UI", lifespan=lifespan)
 
 # Globale Objekte & Locks
 alarm_queue = queue.Queue()
@@ -885,11 +898,11 @@ def api_get_network_status():
         try:
             result = subprocess.check_output(['nmcli', '-t', '-f', 'DEVICE,TYPE,STATE,CONNECTION', 'dev'], text=True)
             for line in result.splitlines():
-                parts = line.split(':')
+                parts = line.split(':', 3)
                 if len(parts) >= 4:
                     if parts[1] == 'wifi' and parts[2] == 'connected':
                         status["mode"] = "wlan"
-                        status["ssid"] = parts[3].strip()
+                        status["ssid"] = parts[3].strip().replace('\\:', ':')
                         break
         except Exception:
             pass
@@ -954,12 +967,16 @@ def api_network_connect(req: NetworkConnectRequest):
             raise HTTPException(status_code=400, detail="SSID fehlt.")
             
         if system == "Windows":
+            # XML Escape um Fehler bei Sonderzeichen (&, <, >) im WLAN-Namen oder Passwort zu verhindern
+            safe_ssid = xml.sax.saxutils.escape(req.ssid)
+            safe_password = xml.sax.saxutils.escape(req.password or "")
+            
             xml_profile = f"""<?xml version="1.0"?>
 <WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
-    <name>{req.ssid}</name>
+    <name>{safe_ssid}</name>
     <SSIDConfig>
         <SSID>
-            <name>{req.ssid}</name>
+            <name>{safe_ssid}</name>
         </SSID>
     </SSIDConfig>
     <connectionType>ESS</connectionType>
@@ -974,7 +991,7 @@ def api_network_connect(req: NetworkConnectRequest):
             <sharedKey>
                 <keyType>passPhrase</keyType>
                 <protected>false</protected>
-                <keyMaterial>{req.password or ""}</keyMaterial>
+                <keyMaterial>{safe_password}</keyMaterial>
             </sharedKey>
         </security>
     </MSM>
@@ -1097,20 +1114,7 @@ def stop_mdns():
             mdns_zeroconf.close()
         except Exception as e:
             logger.error(f"Fehler beim Beenden von mDNS: {e}")
-
-
 if __name__ == "__main__":
-    def signal_handler(sig, frame):
-        logger.info("Shutdown Signal empfangen. Beende Anwendung...")
-        stop_mdns()
-        if pygame and pygame.mixer.get_init():
-            try: pygame.mixer.quit()
-            except: pass
-        sys.exit(0)
-    
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-
     logger.info("--- ALARM SERVER GESTARTET ---")
     
     t_socket = threading.Thread(target=start_socket_service, daemon=True)
@@ -1120,5 +1124,4 @@ if __name__ == "__main__":
     t_reconnect.start()
 
     cfg_live = load_config()
-    start_mdns(cfg_live)
     uvicorn.run(app, host=cfg_live["server"]["host"], port=cfg_live["ui"]["port"], log_level="error")
