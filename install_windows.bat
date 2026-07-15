@@ -34,7 +34,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 %PYTHON_CMD% -m pip install --upgrade pip
-%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart audioop-lts zeroconf
+%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart zeroconf
 
 :: 4. Autostart einrichten
 echo.
