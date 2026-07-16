@@ -4,7 +4,10 @@ services:
     build: .
     container_name: alarmdurchsage
     restart: unless-stopped
-    network_mode: "host"
+    # Unter Windows MUSS port-mapping verwendet werden, 
+    # da network_mode: "host" in Docker Desktop nicht wie auf echtem Linux funktioniert.
+    ports:
+      - "80:80"
     volumes:
       - ./config.json:/app/config.json
       - ./log.json:/app/log.json
@@ -14,11 +17,20 @@ services:
 
   # Dienst für Raspberry Pi (ARM) / Linux mit Audio-Unterstützung
   alarmdurchsage-pi:
-    extends:
-      service: alarmdurchsage
+    build: .
     container_name: alarmdurchsage-pi
+    restart: unless-stopped
+    # Auf echtem Linux/Pi verwenden wir host-networking für mDNS (zeroconf)
+    network_mode: "host"
     devices:
       - "/dev/snd:/dev/snd"
+    volumes:
+      - ./config.json:/app/config.json
+      - ./log.json:/app/log.json
+      - ./system.log:/app/system.log
+      - ./gongs:/app/gongs
+      - ./static:/app/static
     profiles:
       - pi
+
 
