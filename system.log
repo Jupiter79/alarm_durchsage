@@ -1,0 +1,6 @@
+2026-07-16 09:14:00,984 - ERROR - Audio Init endgültig fehlgeschlagen: ALSA: Couldn't open audio device: No such file or directory
+2026-07-16 09:14:00,991 - INFO - Audio-Warteschlange (Worker) gestartet.
+2026-07-16 09:14:01,078 - INFO - --- ALARM SERVER GESTARTET ---
+2026-07-16 09:14:29,686 - ERROR - Fehler beim Abrufen der Audio-Geräte: Audio system not initialised
+2026-07-16 09:14:35,176 - ERROR - Fehler beim Abrufen der Audio-Geräte: Audio system not initialised
+2026-07-16 09:14:46,027 - ERROR - Fehler beim Abrufen der Audio-Geräte: Audio system not initialised

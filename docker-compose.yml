@@ -11,11 +11,7 @@ services:
     profiles:
       - windows
     volumes:
-      - ./config.json:/app/config.json
-      - ./log.json:/app/log.json
-      - ./system.log:/app/system.log
-      - ./gongs:/app/gongs
-      - ./static:/app/static
+      - ./:/app
 
   # Dienst für Raspberry Pi (ARM) / Linux mit Audio-Unterstützung
   alarmdurchsage-pi:
@@ -27,11 +23,7 @@ services:
     devices:
       - "/dev/snd:/dev/snd"
     volumes:
-      - ./config.json:/app/config.json
-      - ./log.json:/app/log.json
-      - ./system.log:/app/system.log
-      - ./gongs:/app/gongs
-      - ./static:/app/static
+      - ./:/app
     profiles:
       - pi
 
