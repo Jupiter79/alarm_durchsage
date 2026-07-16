@@ -36,11 +36,23 @@ from pydantic import BaseModel, ConfigDict
 # =============================================================================
 
 CONFIG_FILE = "config.json"
-CURRENT_VERSION = "v3.0.0"
 
 def load_config():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+        c = json.load(f)
+        
+    if "version" not in c:
+        try:
+            cwd = os.path.dirname(os.path.abspath(__file__))
+            tag = subprocess.check_output(["git", "describe", "--tags", "--abbrev=0"], cwd=cwd, text=True, stderr=subprocess.DEVNULL).strip()
+            c["version"] = tag if tag else "v1.0.0"
+        except Exception:
+            c["version"] = "v1.0.0"
+            
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(c, f, indent=4, ensure_ascii=False)
+            
+    return c
 
 def save_config(cfg_data):
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
@@ -50,7 +62,6 @@ cfg = load_config()
 
 LOG_FILE = cfg["logging"]["file"]
 TTS_TEMP_FILE = "tts_temp.wav"
-DEBUG = cfg.get("debug", False)
 
 logger = logging.getLogger("durchsage")
 logger.setLevel(logging.DEBUG)
@@ -482,7 +493,7 @@ def execute_repeated_announcement(mission_id):
 def process_alarm_logic(data_dict: dict):
     einsatz_id = data_dict.get("id")
     
-    if einsatz_id and is_event_processed(einsatz_id) and not DEBUG:
+    if einsatz_id and is_event_processed(einsatz_id):
         logger.info(f"Alarm mit ID {einsatz_id} ignoriert, da bereits verarbeitet (Duplikat).")
         return {"status": "Duplicate", "id": einsatz_id}
 
@@ -605,15 +616,26 @@ def api_auth_status(session_token: Optional[str] = Cookie(None)):
 def api_update_check(session_token: Optional[str] = Cookie(None)):
     if session_token not in active_sessions:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    cfg_live = load_config()
+    current_version = cfg_live.get("version", "v1.0.0")
+    
     try:
         resp = requests.get("https://api.github.com/repos/Jupiter79/alarm_durchsage/releases/latest", timeout=5)
         if resp.status_code == 200:
-            latest_version = resp.json().get("tag_name", CURRENT_VERSION)
-            update_available = (latest_version != CURRENT_VERSION and latest_version.startswith("v"))
-            return {"current": CURRENT_VERSION, "latest": latest_version, "update_available": update_available}
+            latest_version = resp.json().get("tag_name", current_version)
+            
+            # Simple SemVer comparison (v1.0.1 -> (1, 0, 1))
+            def parse_ver(v):
+                try: return tuple(map(int, v.lstrip('v').split('.')))
+                except: return (0,0,0)
+                
+            is_newer = parse_ver(latest_version) > parse_ver(current_version)
+            update_available = (is_newer and latest_version.startswith("v"))
+            return {"current": current_version, "latest": latest_version, "update_available": update_available}
     except Exception as e:
         logger.error(f"Fehler beim Prüfen auf Updates: {e}")
-    return {"current": CURRENT_VERSION, "latest": CURRENT_VERSION, "update_available": False}
+    return {"current": current_version, "latest": current_version, "update_available": False}
 
 @app.post("/api/update_run")
 def api_update_run(session_token: Optional[str] = Cookie(None)):
@@ -655,6 +677,14 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             if "config.json" not in ignore_content:
                 with open(gitignore_path, "a") as f:
                     f.write("\nconfig.json\nlog.json\n")
+            
+            if latest_version:
+                try:
+                    c = load_config()
+                    c["version"] = latest_version
+                    save_config(c)
+                except Exception as ex:
+                    logger.error(f"Konnte neue Version nicht in config.json schreiben: {ex}")
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
