@@ -498,8 +498,7 @@ function renderConfigEditor() {
 
     // UI & Server
     html += '<div class="config-group"><h5 class="text-primary mb-3">🖥️ System & Web-UI</h5>';
-    html += createInput('Web UI Port', 'ui.port', currentConfig.ui.port, 'number', 'Auf welchem Port soll diese Webseite laufen? (Standard ist 80 (erreichbar unter http://alarmdurchsage.local). Beispiel: Wenn hier 5000 steht, erreichst du die Seite unter http://alarmdurchsage.local:5000. ACHTUNG: Nach einer Änderung muss das Programm komplett neu gestartet werden!)');
-    html += createInput('DNS Name (mDNS)', 'server.dns_name', currentConfig.server?.dns_name || 'alarmdurchsage', 'text', 'Unter welchem Namen soll das System im Netzwerk erreichbar sein? ACHTUNG: Nach einer Änderung muss das Programm komplett neu gestartet werden!)');
+    html += createInput('Web UI Port', 'ui.port', currentConfig.ui.port, 'number', 'Auf welchem Port soll diese Webseite laufen? (Standard ist 80. Beispiel: Wenn hier 5000 steht, erreichst du die Seite unter der IP deines Servers mit Port 5000. ACHTUNG: Nach einer Änderung muss das Programm komplett neu gestartet werden!)');
     html += createInput('Log Aufbewahrung (Tage)', 'logging.retention_days', currentConfig.logging.retention_days, 'number', 'Wie viele Tage sollen vergangene Einsätze in der Historie sichtbar bleiben, bevor sie automatisch gelöscht werden? (Gib -1 ein für unendlich. Empfohlen: 365)');
     html += '</div>';
 

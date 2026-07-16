@@ -33,7 +33,7 @@ if %ERRORLEVEL% EQU 0 (
 )
 
 %PYTHON_CMD% -m pip install --upgrade pip
-%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart zeroconf static-ffmpeg
+%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart static-ffmpeg
 
 :: 3b. FFmpeg lokal einrichten (100% verlaesslich, ohne PATH-Probleme)
 echo.

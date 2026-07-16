@@ -7,4 +7,3 @@ edge-tts
 pydub
 pygame
 python-multipart
-zeroconf

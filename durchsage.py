@@ -64,10 +64,8 @@ logger.addHandler(console_handler)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg_live = load_config()
-    start_mdns(cfg_live)
     yield
-    logger.info("Lifespan Shutdown: Beende mDNS und Audio...")
-    stop_mdns()
+    logger.info("Lifespan Shutdown: Beende Audio...")
     if pygame and pygame.mixer.get_init():
         try: pygame.mixer.quit()
         except: pass
@@ -1089,58 +1087,7 @@ def start_socket_service():
                 last_disconnect_time = time.time()
         time.sleep(5)
 
-# --- mDNS Setup ---
-mdns_zeroconf = None
-mdns_service_info = None
 
-def start_mdns(cfg_live):
-    global mdns_zeroconf, mdns_service_info
-    try:
-        from zeroconf import ServiceInfo, Zeroconf
-        import socket
-        
-        dns_name = cfg_live.get("server", {}).get("dns_name", "alarmdurchsage")
-        if not dns_name:
-            dns_name = "alarmdurchsage"
-            
-        port = int(cfg_live.get("ui", {}).get("port", 5000))
-        
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
-            s.connect(('10.255.255.255', 1))
-            IP = s.getsockname()[0]
-        except Exception:
-            IP = '127.0.0.1'
-        finally:
-            s.close()
-            
-        desc = {'path': '/'}
-        
-        mdns_service_info = ServiceInfo(
-            "_http._tcp.local.",
-            f"{dns_name}._http._tcp.local.",
-            addresses=[socket.inet_aton(IP)],
-            port=port,
-            properties=desc,
-            server=f"{dns_name}.local.",
-        )
-        
-        mdns_zeroconf = Zeroconf()
-        mdns_zeroconf.register_service(mdns_service_info)
-        logger.info(f"mDNS Service registriert als http://{dns_name}.local auf Port {port}")
-    except ImportError:
-        logger.warning("mDNS: Modul 'zeroconf' nicht installiert. Bitte 'pip install zeroconf' ausführen, um http://[dns-name].local nutzen zu können.")
-    except Exception as e:
-        logger.error(f"Fehler bei mDNS Registrierung: {e}")
-
-def stop_mdns():
-    global mdns_zeroconf, mdns_service_info
-    if mdns_zeroconf and mdns_service_info:
-        try:
-            mdns_zeroconf.unregister_service(mdns_service_info)
-            mdns_zeroconf.close()
-        except Exception as e:
-            logger.error(f"Fehler beim Beenden von mDNS: {e}")
 if __name__ == "__main__":
     logger.info("--- ALARM SERVER GESTARTET ---")
     

@@ -22,7 +22,7 @@ services:
     build: .
     container_name: alarmdurchsage-pi
     restart: unless-stopped
-    # Auf echtem Linux/Pi verwenden wir host-networking für mDNS (zeroconf)
+    # Auf echtem Linux/Pi verwenden wir host-networking
     network_mode: "host"
     devices:
       - "/dev/snd:/dev/snd"
