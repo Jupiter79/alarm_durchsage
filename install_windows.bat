@@ -6,9 +6,10 @@ echo  Alarm Durchsage - Windows Installation
 echo =========================================
 echo.
 
-:: 1. System-Pakete installieren mit Winget
-echo [1/4] Installiere System-Pakete (Python)...
+:: 1. System-Pakete installieren mit Winget (Python und Git)
+echo [1/5] Installiere System-Pakete (Python und Git)...
 winget install -e --id Python.Python.3.11 --accept-package-agreements --accept-source-agreements --silent
+winget install -e --id Git.Git --accept-package-agreements --accept-source-agreements --silent
 
 :: PATH in dieser Session aktualisieren (damit py sofort verfuegbar ist)
 echo Aktualisiere Umgebungsvariablen...
@@ -16,14 +17,23 @@ for /f "tokens=2*" %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Ses
 for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USR_PATH=%%B"
 set "PATH=%SYS_PATH%;%USR_PATH%;%PATH%"
 
-:: 2. Arbeitsverzeichnis setzen
-cd /d "%~dp0"
-set "INSTALL_DIR=%cd%"
+:: 2. Projekt klonen
+echo.
+echo [2/5] Lade Projekt herunter...
+set "INSTALL_DIR=%USERPROFILE%\alarm_durchsage"
+if not exist "%INSTALL_DIR%" (
+    git clone https://github.com/Jupiter79/alarm_durchsage.git "%INSTALL_DIR%"
+) else (
+    echo Verzeichnis existiert bereits. Hole neueste Updates...
+    cd /d "%INSTALL_DIR%"
+    git pull
+)
 
+cd /d "%INSTALL_DIR%"
 
 :: 3. Python-Pakete installieren
 echo.
-echo [2/4] Installiere Python-Abhaengigkeiten...
+echo [3/5] Installiere Python-Abhaengigkeiten...
 :: Versuche 'py' (Python Launcher), falls 'python' nicht im PATH ist
 py -m pip --version >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
@@ -37,12 +47,12 @@ if %ERRORLEVEL% EQU 0 (
 
 :: 3b. FFmpeg lokal einrichten (100% verlaesslich, ohne PATH-Probleme)
 echo.
-echo [3/4] Richte FFmpeg lokal ein...
+echo [4/5] Richte FFmpeg lokal ein...
 %PYTHON_CMD% -c "import static_ffmpeg; static_ffmpeg.add_paths(); import shutil, os; shutil.copy(shutil.which('ffmpeg'), '.'); shutil.copy(shutil.which('ffprobe'), '.')" >nul 2>&1
 
 :: 4. Autostart einrichten
 echo.
-echo [4/4] Richte Autostart ein...
+echo [5/5] Richte Autostart ein...
 set "AUTOSTART_DIR=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "VBS_SCRIPT=%INSTALL_DIR%\start_alarm_durchsage.vbs"
 
