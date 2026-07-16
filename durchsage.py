@@ -762,7 +762,15 @@ def api_restart():
     logger.warning("Benutzer hat System-Neustart angefordert. Beende Prozess in 1 Sekunde...")
     def do_restart():
         time.sleep(1)
-        os.execv(sys.executable, ['python', os.path.abspath(__file__)])
+        if platform.system() == "Windows":
+            vbs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_alarm_durchsage.vbs")
+            if os.path.exists(vbs_path):
+                os.startfile(vbs_path)
+                os._exit(0)
+            else:
+                os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
+        else:
+            os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
     threading.Thread(target=do_restart, daemon=True).start()
     return {"status": "ok", "message": "Neustart eingeleitet..."}
 
