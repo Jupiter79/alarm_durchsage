@@ -1,27 +1,24 @@
 services:
+  # Standard-Dienst (Perfekt für Windows/AMD64 ohne lokale Audioausgabe)
   alarmdurchsage:
     build: .
     container_name: alarmdurchsage
     restart: unless-stopped
-    
-    # network_mode: "host" sorgt dafür, dass der Container das Netzwerk 
-    # des Host-Computers 1:1 teilt. 
-    # Dadurch nimmt das Programm IMMER exakt den Port, der in der config.json 
-    # eingestellt ist (ohne dass man in Docker Ports mappen muss). 
-    # Außerdem ist das zwingend notwendig, damit mDNS (z.B. alarmdurchsage.local) 
-    # im Netzwerk korrekt funktioniert.
     network_mode: "host"
-    
-    # Volumes binden den Ordner und die Dateien an den Host, 
-    # damit Änderungen (z.B. in der config.json, Logs oder Gongs) 
-    # auch nach einem Neustart/Update des Containers erhalten bleiben.
     volumes:
       - ./config.json:/app/config.json
       - ./log.json:/app/log.json
       - ./system.log:/app/system.log
       - ./gongs:/app/gongs
       - ./static:/app/static
-      
-    # Erlaubt den Zugriff auf die Soundkarte des Host-Systems (vor allem unter Linux/Raspberry Pi)
+
+  # Dienst für Raspberry Pi (ARM) / Linux mit Audio-Unterstützung
+  alarmdurchsage-pi:
+    extends:
+      service: alarmdurchsage
+    container_name: alarmdurchsage-pi
     devices:
       - "/dev/snd:/dev/snd"
+    profiles:
+      - pi
+
