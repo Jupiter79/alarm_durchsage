@@ -380,6 +380,9 @@ async function initApp() {
 
     // Load config to set alarm mode initially
     await loadConfig();
+    
+    // Check for updates
+    checkUpdate();
 }
 
 async function clearQueue() {
@@ -954,3 +957,54 @@ window.loadNetworkStatus = async function () {
         console.error("Fehler beim Laden des Netzwerkstatus", e);
     }
 };
+
+// --- Updates ---
+async function checkUpdate() {
+    try {
+        const res = await fetch('/api/update_check');
+        if (res.ok) {
+            const data = await res.json();
+            if (data.update_available) {
+                document.getElementById('update-current-version').innerText = data.current;
+                document.getElementById('update-latest-version').innerText = data.latest;
+                document.getElementById('update-alert').style.display = 'block';
+            }
+        }
+    } catch (e) {
+        console.error("Fehler beim Update Check", e);
+    }
+}
+
+async function runUpdate() {
+    if (!confirm("Möchtest du das Update jetzt installieren? Der Server wird dabei neu gestartet.")) return;
+    
+    const btn = document.getElementById('btn-run-update');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Wird installiert...';
+    btn.disabled = true;
+    
+    try {
+        await fetch('/api/update_run', { method: 'POST' });
+        
+        let attempts = 0;
+        const checkAlive = setInterval(async () => {
+            attempts++;
+            try {
+                const res = await fetch('/api/auth_status');
+                if (res.ok) {
+                    clearInterval(checkAlive);
+                    window.location.reload();
+                }
+            } catch (e) {}
+            
+            if (attempts > 30) {
+                clearInterval(checkAlive);
+                alert("Update dauerte zu lange. Bitte lade die Seite manuell neu.");
+            }
+        }, 2000);
+        
+    } catch (e) {
+        alert("Fehler beim Starten des Updates.");
+        btn.innerHTML = '<i class="fa-solid fa-arrows-rotate me-2"></i>Jetzt aktualisieren';
+        btn.disabled = false;
+    }
+}

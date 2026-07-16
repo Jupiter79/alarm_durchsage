@@ -36,6 +36,7 @@ from pydantic import BaseModel, ConfigDict
 # =============================================================================
 
 CONFIG_FILE = "config.json"
+CURRENT_VERSION = "v3.0.0"
 
 def load_config():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
@@ -599,6 +600,73 @@ def api_auth_status(session_token: Optional[str] = Cookie(None)):
     if session_token in active_sessions:
         return {"authenticated": True, "password_changed": cfg_live["ui"]["password_changed"]}
     return {"authenticated": False}
+
+@app.get("/api/update_check")
+def api_update_check(session_token: Optional[str] = Cookie(None)):
+    if session_token not in active_sessions:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    try:
+        resp = requests.get("https://api.github.com/repos/Jupiter79/alarm_durchsage/releases/latest", timeout=5)
+        if resp.status_code == 200:
+            latest_version = resp.json().get("tag_name", CURRENT_VERSION)
+            update_available = (latest_version != CURRENT_VERSION and latest_version.startswith("v"))
+            return {"current": CURRENT_VERSION, "latest": latest_version, "update_available": update_available}
+    except Exception as e:
+        logger.error(f"Fehler beim Prüfen auf Updates: {e}")
+    return {"current": CURRENT_VERSION, "latest": CURRENT_VERSION, "update_available": False}
+
+@app.post("/api/update_run")
+def api_update_run(session_token: Optional[str] = Cookie(None)):
+    if session_token not in active_sessions:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    def run_update():
+        logger.info("Starte Update-Prozess...")
+        try:
+            cwd = os.path.dirname(os.path.abspath(__file__))
+            
+            # Sichern
+            if os.path.exists(os.path.join(cwd, CONFIG_FILE)):
+                shutil.copy(os.path.join(cwd, CONFIG_FILE), os.path.join(cwd, CONFIG_FILE + ".bak"))
+            if os.path.exists(os.path.join(cwd, "log.json")):
+                shutil.copy(os.path.join(cwd, "log.json"), os.path.join(cwd, "log.json.bak"))
+                
+            subprocess.run(["git", "fetch", "--tags"], check=True, cwd=cwd)
+            
+            resp = requests.get("https://api.github.com/repos/Jupiter79/alarm_durchsage/releases/latest", timeout=5)
+            latest_version = resp.json().get("tag_name")
+            
+            if latest_version:
+                subprocess.run(["git", "reset", "--hard"], check=True, cwd=cwd)
+                subprocess.run(["git", "checkout", latest_version], check=True, cwd=cwd)
+            
+            # Wiederherstellen
+            if os.path.exists(os.path.join(cwd, CONFIG_FILE + ".bak")):
+                shutil.copy(os.path.join(cwd, CONFIG_FILE + ".bak"), os.path.join(cwd, CONFIG_FILE))
+            if os.path.exists(os.path.join(cwd, "log.json.bak")):
+                shutil.copy(os.path.join(cwd, "log.json.bak"), os.path.join(cwd, "log.json"))
+                
+            # Sicherstellen, dass gitignore existiert und config enthält
+            gitignore_path = os.path.join(cwd, ".gitignore")
+            ignore_content = ""
+            if os.path.exists(gitignore_path):
+                with open(gitignore_path, "r") as f:
+                    ignore_content = f.read()
+            if "config.json" not in ignore_content:
+                with open(gitignore_path, "a") as f:
+                    f.write("\nconfig.json\nlog.json\n")
+            
+            logger.info("Update erfolgreich, starte neu...")
+            time.sleep(2)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        except Exception as e:
+            logger.error(f"Fehler beim Update: {e}")
+            # Auch bei Fehler Config zurückspielen
+            if os.path.exists(os.path.join(cwd, CONFIG_FILE + ".bak")):
+                shutil.copy(os.path.join(cwd, CONFIG_FILE + ".bak"), os.path.join(cwd, CONFIG_FILE))
+
+    threading.Thread(target=run_update, daemon=True).start()
+    return {"status": "Update gestartet"}
 
 @app.post("/api/change_password", dependencies=[Depends(verify_session)])
 def api_change_password(data: LoginData):
