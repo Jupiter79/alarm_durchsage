@@ -27,6 +27,26 @@ Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötig
 * **Hardware & Betriebssystem:** Ein kleiner Rechner, am besten ein **Raspberry Pi (Linux/Raspberry Pi OS)** oder ein handelsüblicher **Mini-PC mit Windows**. Das gesamte System ist zu 100% plattformunabhängig und läuft nativ auf Linux und Windows.
 * **Audio-Verbindung:** Ein Adapterkabel (meist **AUX auf Cinch**), um den Audioausgang (Kopfhöreranschluss) des Raspberry Pi/PCs direkt mit dem Verstärker bzw. der Lautsprecheranlage des Feuerwehrhauses zu verbinden.
 * **Netzwerk (LAN & WLAN):** Das System unterstützt vollumfänglich sowohl **LAN (Kabel)** als auch **WLAN (Drahtlos)** für Windows und Linux. Direkt auf der Webseite findest du einen eigenen Tab "Internet", in dem du ganz bequem WLAN-Netzwerke in deiner Umgebung suchen, dich mit einem Passwort verbinden oder jederzeit zurück auf LAN wechseln kannst. Für eine ausfallsichere Verbindung im Feuerwehrhaus wird dennoch ein festes LAN-Kabel empfohlen.
+---
+
+## 🚀 Installation
+
+Es gibt 3 verschiedene Wege, das Alarmdurchsage-System zu installieren, je nachdem, welche Hardware du nutzt:
+
+### 1. Fertiges Alpine Linux Image für Raspberry (kommt noch)
+Die absolut einfachste Variante für den Raspberry Pi: In Zukunft wird es ein komplett fertiges, maßgeschneidertes Image (Betriebssystem-Abbild) geben. Dieses musst du nur auf eine SD-Karte flashen, in den Raspberry Pi stecken und das System ist ohne weitere Einrichtung sofort startklar. (Befindet sich aktuell noch in Arbeit).
+
+### 2. Manuelle Installation auf Linux / Pi (via Docker)
+Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
+1. Lade dir **nur** das Installationsskript `install_linux.sh` auf dein Linux-Gerät herunter.
+2. Führe das Skript im Terminal aus: `bash install_linux.sh`
+3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
+
+### 3. Manuelle Installation auf Windows
+Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
+1. Lade dir **nur** die Datei `install_windows.bat` herunter.
+2. Mache einen einfachen Doppelklick auf die Datei.
+3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem kurzen PC-Neustart läuft das System unsichtbar im Hintergrund mit.
 
 ---
 
