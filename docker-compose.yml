@@ -8,6 +8,8 @@ services:
     # da network_mode: "host" in Docker Desktop nicht wie auf echtem Linux funktioniert.
     ports:
       - "80:80"
+    profiles:
+      - windows
     volumes:
       - ./config.json:/app/config.json
       - ./log.json:/app/log.json
