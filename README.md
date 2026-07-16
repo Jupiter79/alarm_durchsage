@@ -38,14 +38,16 @@ Die absolut einfachste Variante für den Raspberry Pi: In Zukunft wird es ein ko
 
 ### 2. Manuelle Installation auf Linux / Pi (via Docker)
 Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
-1. Lade dir **nur** das Installationsskript `install_linux.sh` auf dein Linux-Gerät herunter.
+1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)
+   *(Oder lade es per Terminal herunter: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
 2. Führe das Skript im Terminal aus: `bash install_linux.sh`
 3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
 
 ### 3. Manuelle Installation auf Windows
 Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
-1. Lade dir **nur** die Datei `install_windows.bat` herunter.
-2. Mache einen einfachen Doppelklick auf die Datei.
+1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_windows.bat)
+   *(Rechtsklick auf die Seite -> "Speichern unter..." wählen, falls sich nur der Text öffnet)*
+2. Mache einen einfachen Doppelklick auf die heruntergeladene Datei `install_windows.bat`.
 3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem kurzen PC-Neustart läuft das System unsichtbar im Hintergrund mit.
 
 ---
