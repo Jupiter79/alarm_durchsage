@@ -7,7 +7,7 @@ services:
     # Unter Windows MUSS port-mapping verwendet werden, 
     # da network_mode: "host" in Docker Desktop nicht wie auf echtem Linux funktioniert.
     ports:
-      - "80:80"
+      - "8122:8122"
     profiles:
       - windows
     volumes:
