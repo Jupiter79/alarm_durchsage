@@ -33,8 +33,15 @@ Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötig
 
 Es gibt 3 verschiedene Wege, das Alarmdurchsage-System zu installieren, je nachdem, welche Hardware du nutzt:
 
-### 1. Fertiges Alpine Linux Image für Raspberry (kommt noch)
-Die absolut einfachste Variante für den Raspberry Pi: In Zukunft wird es ein komplett fertiges, maßgeschneidertes Image (Betriebssystem-Abbild) geben. Dieses musst du nur auf eine SD-Karte flashen, in den Raspberry Pi stecken und das System ist ohne weitere Einrichtung sofort startklar. (Befindet sich aktuell noch in Arbeit).
+### 1. Fertiges Image (DietPi OS (64bit))
+Die absolut einfachste Variante für den Raspberry Pi. Befolge einfach diese simplen Schritte, damit es garantiert klappt:
+
+1. **Pi Imager laden:** Lade dir das offizielle Programm [Raspberry Pi Imager](https://www.raspberrypi.com/software/) herunter und installiere es auf deinem Computer.
+2. **SD-Karte flashen:** Starte den Pi Imager. Wähle das Betriebssystem aus, wähle deine eingesteckte SD-Karte und klicke auf "Schreiben", um das System auf die Karte zu flashen.
+3. **Dateien kopieren:** Wenn der Imager fertig ist, öffnest du die SD-Karte an deinem PC. Lade dir hier aus dem Projekt den Ordner `install_files` herunter und kopiere **beide Dateien** daraus direkt auf das Hauptverzeichnis deiner SD-Karte. **WICHTIG:** Wenn du gefragt wirst, ob Dateien ersetzt werden sollen, musst du das unbedingt mit **Ja (Überschreiben)** bestätigen!
+4. **LAN-Kabel anschließen (ZWINGEND):** Stecke die fertige SD-Karte in deinen Raspberry Pi. Bevor du ihm Strom gibst, **musst** du ihn zwingend per LAN-Kabel an dein Netzwerk anschließen. Über WLAN wird diese erste Installation fehlschlagen!
+5. **Einschalten & Warten:** Schließe den Strom an. Der Raspberry Pi installiert nun alles komplett vollautomatisch im Hintergrund. Je nach deiner Internetverbindung dauert das ca. **20 bis 30 Minuten**. Bitte lass den Pi in dieser Zeit einfach in Ruhe arbeiten und trenne nicht den Strom.
+6. **Fertig:** Danach ist dein System einsatzbereit! Du kannst nun von jedem anderen Gerät (z.B. deinem Handy oder einem anderen PC, das sich im gleichen Netzwerk befindet) über deinen normalen Webbrowser auf das Web-GUI zugreifen. Die Adresse lautet meistens `http://alarmdurchsage.local:8122` (oder du nutzt die IP-Adresse des Pis, die du in deinem Router findest).
 
 ### 2. Manuelle Installation auf Linux / Pi (via Docker)
 Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
