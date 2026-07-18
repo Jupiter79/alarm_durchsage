@@ -3,22 +3,33 @@ set -e
 
 echo "====================================================="
 echo " Alarmdurchsage - Linux / Raspberry Pi Installer"
+echo " (Optimiert für Raspberry Pi OS Lite 64-bit)"
 echo "====================================================="
 
-# 1. Grundlegende Werkzeuge installieren
-echo ">>> [1/6] Installiere Basis-Werkzeuge..."
-sudo apt-get update -y
-sudo apt-get install -y git curl network-manager
+# 1. Grundlegende Werkzeuge prüfen und installieren
+echo ">>> [1/6] Prüfe Basis-Werkzeuge..."
 
-# NetworkManager aktivieren (wichtig für DietPi und WLAN-Steuerung)
-echo "Starte NetworkManager..."
-sudo systemctl enable NetworkManager || true
-sudo systemctl start NetworkManager || true
+PACKAGES_TO_INSTALL=""
 
-# NetworkManager zwingen, die Kontrolle über das WLAN zu übernehmen
-if [ -f /etc/NetworkManager/NetworkManager.conf ]; then
-    sudo sed -i 's/managed=false/managed=true/g' /etc/NetworkManager/NetworkManager.conf
-    sudo systemctl restart NetworkManager
+if ! command -v git &> /dev/null; then
+    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL git"
+fi
+
+if ! command -v curl &> /dev/null; then
+    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL curl"
+fi
+
+if ! command -v nmcli &> /dev/null; then
+    # Wenn nmcli nicht da ist, fehlt der NetworkManager
+    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
+fi
+
+if [ -n "$PACKAGES_TO_INSTALL" ]; then
+    echo "Installiere fehlende Pakete: $PACKAGES_TO_INSTALL"
+    sudo apt-get update -y
+    sudo apt-get install -y $PACKAGES_TO_INSTALL
+else
+    echo "Alle Basis-Werkzeuge (git, curl, network-manager) sind bereits installiert!"
 fi
 
 # 2. Docker installieren (falls noch nicht vorhanden)
@@ -35,6 +46,7 @@ else
 fi
 
 # Stelle sicher, dass Docker beim Systemstart (Autostart) automatisch gestartet wird
+echo "Stelle sicher, dass Docker beim Systemstart aktiviert ist..."
 sudo systemctl enable docker || true
 sudo systemctl start docker || true
 
