@@ -8,7 +8,12 @@ echo "====================================================="
 # 1. Grundlegende Werkzeuge installieren
 echo ">>> [1/6] Installiere Basis-Werkzeuge..."
 sudo apt-get update -y
-sudo apt-get install -y git curl
+sudo apt-get install -y git curl network-manager
+
+# NetworkManager aktivieren (wichtig für DietPi und WLAN-Steuerung)
+echo "Starte NetworkManager..."
+sudo systemctl enable NetworkManager || true
+sudo systemctl start NetworkManager || true
 
 # 2. Docker installieren (falls noch nicht vorhanden)
 echo ">>> [2/6] Prüfe Docker-Installation..."

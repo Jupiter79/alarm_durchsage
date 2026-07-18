@@ -20,6 +20,9 @@ services:
     restart: unless-stopped
     # Auf echtem Linux/Pi verwenden wir host-networking
     network_mode: "host"
+    privileged: true
+    environment:
+      - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
     devices:
       - "/dev/snd:/dev/snd"
     volumes:
