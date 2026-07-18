@@ -15,6 +15,12 @@ echo "Starte NetworkManager..."
 sudo systemctl enable NetworkManager || true
 sudo systemctl start NetworkManager || true
 
+# NetworkManager zwingen, die Kontrolle über das WLAN zu übernehmen
+if [ -f /etc/NetworkManager/NetworkManager.conf ]; then
+    sudo sed -i 's/managed=false/managed=true/g' /etc/NetworkManager/NetworkManager.conf
+    sudo systemctl restart NetworkManager
+fi
+
 # 2. Docker installieren (falls noch nicht vorhanden)
 echo ">>> [2/6] Prüfe Docker-Installation..."
 if ! command -v docker &> /dev/null; then
@@ -27,6 +33,10 @@ if ! command -v docker &> /dev/null; then
 else
     echo "Docker ist bereits installiert!"
 fi
+
+# Stelle sicher, dass Docker beim Systemstart (Autostart) automatisch gestartet wird
+sudo systemctl enable docker || true
+sudo systemctl start docker || true
 
 # 3. Projekt klonen
 echo ">>> [3/6] Lade Projekt herunter..."
@@ -61,5 +71,5 @@ echo " Er startet bei jedem PC-Neustart dank Docker automatisch wieder."
 echo ""
 echo " Die Weboberfläche ist in wenigen Sekunden erreichbar unter:"
 echo " -> http://${IP_ADDR}:8122"
-echo " -> http://alarmdurchsage.local (falls der Hostname so lautet)"
+echo " -> http://alarmdurchsage.local:8122 (falls der Hostname so lautet)"
 echo "====================================================="
