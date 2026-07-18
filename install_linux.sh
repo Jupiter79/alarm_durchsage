@@ -2,8 +2,8 @@
 set -e
 
 echo "====================================================="
-echo " Alarmdurchsage - Linux / Raspberry Pi Installer"
-echo " (Optimiert für Raspberry Pi OS Lite 64-bit)"
+echo " Alarmdurchsage - DietPi Installer"
+echo " (Optimiert für DietPi mit NetworkManager)"
 echo "====================================================="
 
 # 1. Grundlegende Werkzeuge prüfen und installieren
@@ -20,7 +20,6 @@ if ! command -v curl &> /dev/null; then
 fi
 
 if ! command -v nmcli &> /dev/null; then
-    # Wenn nmcli nicht da ist, fehlt der NetworkManager
     PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
 fi
 
@@ -31,6 +30,25 @@ if [ -n "$PACKAGES_TO_INSTALL" ]; then
 else
     echo "Alle Basis-Werkzeuge (git, curl, network-manager) sind bereits installiert!"
 fi
+
+# 1.5 DietPi Netzwerk-Fix
+echo ">>> [1.5/6] Konfiguriere NetworkManager für DietPi..."
+
+# wlan0 aus der DietPi-eigenen Konfiguration entfernen, damit NetworkManager nicht blockiert wird
+if grep -q "wlan0" /etc/network/interfaces 2>/dev/null; then
+    echo "Deaktiviere wlan0 in /etc/network/interfaces (DietPi Fallback)..."
+    sudo sed -i 's/^.*wlan0.*$/#&/g' /etc/network/interfaces
+fi
+
+# NetworkManager zwingen, die Verwaltung zu übernehmen
+if [ -f /etc/NetworkManager/NetworkManager.conf ]; then
+    echo "Setze managed=true im NetworkManager..."
+    sudo sed -i 's/managed=false/managed=true/g' /etc/NetworkManager/NetworkManager.conf
+fi
+
+echo "Starte NetworkManager neu..."
+sudo systemctl enable NetworkManager || true
+sudo systemctl restart NetworkManager || true
 
 # 2. Docker installieren (falls noch nicht vorhanden)
 echo ">>> [2/6] Prüfe Docker-Installation..."
