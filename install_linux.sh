@@ -45,9 +45,10 @@ if grep -q "wlan0" /etc/network/interfaces 2>/dev/null; then
 fi
 
 # NetworkManager zwingen, die Verwaltung zu übernehmen
+# ACHTUNG: Niemals managed=true global setzen auf DietPi, sonst bricht eth0 (LAN) ab!
 if [ -f /etc/NetworkManager/NetworkManager.conf ]; then
-    echo "Setze managed=true im NetworkManager..."
-    sudo sed -i 's/managed=false/managed=true/g' /etc/NetworkManager/NetworkManager.conf
+    echo "Stelle sicher, dass NetworkManager.conf sicher für DietPi ist (managed=false)..."
+    sudo sed -i 's/managed=true/managed=false/g' /etc/NetworkManager/NetworkManager.conf
 fi
 
 echo "Starte NetworkManager neu..."
@@ -78,10 +79,11 @@ After=network.target dietpi-postboot.service NetworkManager.service docker.servi
 
 [Service]
 Type=oneshot
-# 1. Beende stur laufende DietPi wpa_supplicant Instanzen
-# 2. Entsperre WLAN Hardware
+# 1. Entsperre WLAN Hardware (rfkill)
+# 2. Bringe WLAN Schnittstelle hoch
 # 3. Zwinge NetworkManager zur Übernahme
-ExecStart=/bin/bash -c 'killall wpa_supplicant || true; rfkill unblock wifi || true; rfkill unblock wlan || true; ip link set wlan0 up || true; nmcli dev set wlan0 managed yes || true; nmcli radio wifi on || true'
+# 4. Starte NetworkManager sauber neu (killt NICHT mehr wpa_supplicant hart, um eth0/NM nicht zu stören!)
+ExecStart=/bin/bash -c 'rfkill unblock wifi || true; rfkill unblock wlan || true; ip link set wlan0 up || true; nmcli dev set wlan0 managed yes || true; nmcli radio wifi on || true; systemctl restart NetworkManager || true'
 RemainAfterExit=yes
 
 [Install]
@@ -92,13 +94,28 @@ sudo systemctl daemon-reload
 sudo systemctl enable alarm-network-fix.service
 sudo systemctl start alarm-network-fix.service
 
-# 1.7 DietPi Audio aktivieren
+# 1.7 DietPi Audio vollautomatisch aktivieren (Pi 3/4 vs Pi 5)
 echo ">>> [1.7/6] Aktiviere Onboard-Audio permanent..."
-# In config.txt eintragen
+
+if [ -f /boot/dietpi/func/dietpi-set_hardware ]; then
+    echo "DietPi-Konfigurationswerkzeug gefunden."
+    PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || true)
+    echo "Erkanntes Mainboard-Modell: $PI_MODEL"
+    
+    if [[ "$PI_MODEL" == *"Raspberry Pi 5"* ]]; then
+        echo "Raspberry Pi 5 hat keinen Aux-Anschluss. Aktiviere HDMI-Audio als Standard..."
+        sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-hdmi || true
+    else
+        echo "Aktiviere nativen 3.5mm Aux-Anschluss als Standard..."
+        sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-3.5mm || true
+    fi
+fi
+
+# Fallback für Standard-Raspberry Pi OS
 for CONFIG_FILE in /boot/config.txt /boot/firmware/config.txt; do
     if [ -f "$CONFIG_FILE" ]; then
         if ! grep -q "^dtparam=audio=on" "$CONFIG_FILE"; then
-            echo "Aktiviere Audio in $CONFIG_FILE"
+            echo "Aktiviere Audio-Fallback in $CONFIG_FILE"
             echo "dtparam=audio=on" | sudo tee -a "$CONFIG_FILE"
         fi
     fi
