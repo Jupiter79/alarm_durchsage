@@ -600,7 +600,7 @@ def login_external():
                 "persistent": "true",
                 "sessionName": "DurchsageServer"
             },
-            timeout=10
+            timeout=30
         )
         resp.raise_for_status()
         return True
