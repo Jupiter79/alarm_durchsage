@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Log-Datei für die Installation anlegen (schreibt in die Konsole und in die Datei gleichzeitig)
+LOG_FILE="/var/log/alarmdurchsage_install.log"
+exec > >(tee -i "$LOG_FILE") 2>&1
+
 echo "====================================================="
 echo " Alarmdurchsage - DietPi Installer"
 echo " (Optimiert für DietPi mit NetworkManager & Audio)"
@@ -198,12 +202,14 @@ IP_ADDR=$(hostname -I | awk '{print $1}')
 echo "====================================================="
 echo " INSTALLATION ABGESCHLOSSEN!"
 echo "====================================================="
-echo " Der Container läuft jetzt im Hintergrund."
-echo " Er startet bei jedem PC-Neustart dank Docker automatisch wieder."
-echo ""
-echo " Die Weboberfläche ist in wenigen Sekunden erreichbar unter:"
+echo " Der Container ist fertig eingerichtet."
+echo " Die Weboberfläche ist nach dem Neustart erreichbar unter:"
 echo " -> http://${IP_ADDR}:8122"
-echo " -> http://alarmdurchsage.local:8122 (falls der Hostname so lautet)"
-echo " WICHTIG: Wenn du DietPi nutzt, starte den Pi jetzt am besten"
-echo " einmal neu mit dem Befehl: sudo reboot"
+echo " -> http://alarmdurchsage.local:8122"
+echo ""
+echo " WICHTIG: Das System muss neugestartet werden, damit Audio"
+echo " und WLAN-Chips auf Hardware-Ebene freigeschaltet werden."
 echo "====================================================="
+echo " Der Raspberry Pi startet in 10 Sekunden automatisch neu..."
+sleep 10
+sudo reboot
