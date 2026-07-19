@@ -35,23 +35,33 @@ else
     echo "Alle Basis-Werkzeuge (git, curl, network-manager) sind bereits installiert!"
 fi
 
-# 1.5 DietPi Netzwerk-Fix
-echo ">>> [1.5/6] Konfiguriere NetworkManager für DietPi..."
+# 1.5 DietPi Netzwerk-Architektur auf "Pure NetworkManager" umbauen
+echo ">>> [1.5/6] Konfiguriere NetworkManager als alleinigen Herrscher..."
 
-# wlan0 aus der DietPi-eigenen Konfiguration entfernen, damit NetworkManager nicht blockiert wird
-if grep -q "wlan0" /etc/network/interfaces 2>/dev/null; then
-    echo "Deaktiviere wlan0 in /etc/network/interfaces (DietPi Fallback)..."
-    sudo sed -i 's/^.*wlan0.*$/#&/g' /etc/network/interfaces
+# ifupdown entmachten (DietPis alte Netzwerkkontrolle deaktivieren)
+if [ -f /etc/network/interfaces ]; then
+    if ! grep -q "Pure NetworkManager Setup" /etc/network/interfaces; then
+        echo "Sichere alte DietPi Netzwerk-Konfiguration..."
+        sudo cp /etc/network/interfaces /etc/network/interfaces.bak
+        
+        echo "Lösche ifupdown-Konfiguration für eth0 und wlan0..."
+        sudo bash -c 'cat << EOF > /etc/network/interfaces
+# Pure NetworkManager Setup
+# Diese Datei wurde geleert, damit der NetworkManager die volle Kontrolle
+# über alle LAN-Kabel und WLAN-Chips übernehmen kann.
+auto lo
+iface lo inet loopback
+EOF'
+    fi
 fi
 
 # NetworkManager zwingen, die Verwaltung zu übernehmen
-# ACHTUNG: Niemals managed=true global setzen auf DietPi, sonst bricht eth0 (LAN) ab!
 if [ -f /etc/NetworkManager/NetworkManager.conf ]; then
-    echo "Stelle sicher, dass NetworkManager.conf sicher für DietPi ist (managed=false)..."
-    sudo sed -i 's/managed=true/managed=false/g' /etc/NetworkManager/NetworkManager.conf
+    echo "Setze managed=true im NetworkManager, um alles zu übernehmen..."
+    sudo sed -i 's/managed=false/managed=true/g' /etc/NetworkManager/NetworkManager.conf
 fi
 
-echo "Starte NetworkManager neu..."
+echo "Starte NetworkManager neu (LAN-Verbindung könnte kurz abbrechen)..."
 sudo systemctl enable NetworkManager || true
 sudo systemctl restart NetworkManager || true
 
@@ -62,7 +72,7 @@ sudo rm -f /etc/modprobe.d/dietpi-disable_wifi.conf 2>/dev/null || true
 sudo rm -f /etc/modprobe.d/dietpi-disable_audio.conf 2>/dev/null || true
 sudo rm -f /etc/modprobe.d/dietpi-disable_bluetooth.conf 2>/dev/null || true
 
-# 1.6 DietPi WLAN-Sperre aufheben & dauerhaften Fix installieren
+# 1.6 DietPi WLAN-Sperre aufheben & einfachen Wachhund installieren
 echo ">>> [1.6/6] Installiere permanenten WLAN-Wachhund für Reboots..."
 sudo rfkill unblock wifi || true
 sudo rfkill unblock wlan || true
@@ -70,20 +80,16 @@ if command -v nmcli &> /dev/null; then
     sudo nmcli radio wifi on || true
 fi
 
-# Erstelle einen Systemdienst, der DietPis Boot-Skripte nachträglich überschreibt
+# Erstelle einen Systemdienst, der sicherstellt, dass DietPi beim Booten das WLAN nicht hardwareseitig sperrt
 cat << 'EOF' | sudo tee /etc/systemd/system/alarm-network-fix.service
 [Unit]
 Description=Alarmdurchsage Network Fix for DietPi
-# Wir warten ab, bis DietPi und das normale Netzwerk fertig geladen haben
 After=network.target dietpi-postboot.service NetworkManager.service docker.service
 
 [Service]
 Type=oneshot
-# 1. Entsperre WLAN Hardware (rfkill)
-# 2. Bringe WLAN Schnittstelle hoch
-# 3. Zwinge NetworkManager zur Übernahme
-# 4. Starte NetworkManager sauber neu (killt NICHT mehr wpa_supplicant hart, um eth0/NM nicht zu stören!)
-ExecStart=/bin/bash -c 'rfkill unblock wifi || true; rfkill unblock wlan || true; ip link set wlan0 up || true; nmcli dev set wlan0 managed yes || true; nmcli radio wifi on || true; systemctl restart NetworkManager || true'
+# Entsperre WLAN Hardware (rfkill) und schalte Radio an
+ExecStart=/bin/bash -c 'rfkill unblock wifi || true; rfkill unblock wlan || true; nmcli radio wifi on || true'
 RemainAfterExit=yes
 
 [Install]
