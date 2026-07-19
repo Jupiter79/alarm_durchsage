@@ -73,6 +73,25 @@ console_handler = logging.StreamHandler()
 console_handler.setFormatter(syslog_formatter)
 logger.addHandler(console_handler)
 
+# Globale Exception-Hooks für absolute Sicherheit, dass nichts ungeloggt bleibt
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.critical("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
+
+def handle_unraisable(unraisable):
+    logger.critical(f"Unraisable exception: {unraisable.err_msg}", exc_info=(unraisable.exc_type, unraisable.exc_value, unraisable.exc_traceback))
+
+sys.unraisablehook = handle_unraisable
+
+def handle_thread_exception(args):
+    logger.critical(f"Uncaught exception in thread {args.thread.name}", exc_info=(args.exc_type, args.exc_value, args.exc_traceback))
+
+threading.excepthook = handle_thread_exception
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     cfg_live = load_config()
@@ -80,9 +99,15 @@ async def lifespan(app: FastAPI):
     logger.info("Lifespan Shutdown: Beende Audio...")
     if pygame and pygame.mixer.get_init():
         try: pygame.mixer.quit()
-        except: pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
 
 app = FastAPI(title="Alarmdurchsage Server Web UI", lifespan=lifespan)
+
+@app.exception_handler(Exception)
+async def global_fastapi_exception_handler(request: Request, exc: Exception):
+    logger.exception(f"Unhandled FastAPI Exception on {request.url}")
+    return Response(status_code=500, content="Internal Server Error")
 
 # Globale Objekte & Locks
 alarm_queue = queue.Queue()
@@ -113,14 +138,14 @@ def ensure_mixer():
                 try:
                     pygame.mixer.init(devicename=audio_device)
                 except Exception as e:
-                    logger.warning(f"Audio Init mit Device '{audio_device}' fehlgeschlagen ({e}), versuche Standard...")
+                    logger.exception(f"Audio Init mit Device '{audio_device}' fehlgeschlagen (), versuche Standard...")
                     pygame.mixer.init()
             else:
                 pygame.mixer.init()
             pygame.mixer.music.set_volume(1)
             logger.info(f"Audio-System initialisiert. Device: {audio_device or 'Standard'}")
         except Exception as e:
-            logger.error(f"Audio Init endgültig fehlgeschlagen: {e}")
+            logger.exception(f"Audio Init endgültig fehlgeschlagen: ")
 
 ensure_mixer()
 
@@ -143,7 +168,7 @@ def robust_api_get(url):
         resp.raise_for_status()
         return resp.json()
     except Exception as e:
-        logger.error(f"Fehler bei {url}: {e}")
+        logger.exception(f"Fehler bei {url}: ")
         return None
 
 def get_department_status_data():
@@ -195,7 +220,7 @@ def socket_action(data):
     try:
         process_alarm_logic(data)
     except Exception as e:
-        logger.error(f"Fehler bei Verarbeitung des Socket Actions: {e}")
+        logger.exception(f"Fehler bei Verarbeitung des Socket Actions: ")
 
 # =============================================================================
 # 5. LOGGING
@@ -341,7 +366,8 @@ async def generate_tts(text, filename):
     
     if os.path.exists(filename):
         try: os.remove(filename)
-        except Exception: pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
     
     cfg_live = load_config()
     try:
@@ -360,10 +386,10 @@ async def generate_tts(text, filename):
                 os.remove(temp_mp3)
                 return filename
             except Exception as e:
-                logger.error(f"FFmpeg fehlt oder Pydub Fehler! Verarbeitung abgebrochen. ({e})")
+                logger.exception(f"FFmpeg fehlt oder Pydub Fehler! Verarbeitung abgebrochen. ()")
                 return None
     except Exception as e:
-        logger.error(f"TTS Fehler: {e}")
+        logger.exception(f"TTS Fehler: ")
         return None
     return None
 
@@ -381,9 +407,10 @@ def play_file_blocking(filepath):
         while pygame.mixer.music.get_busy():
             time.sleep(0.1)
         try: pygame.mixer.music.unload()
-        except: pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
     except Exception as e:
-        logger.error(f"Playback Fehler bei {filepath}: {e}")
+        logger.exception(f"Playback Fehler bei {filepath}: ")
 
 def worker_loop():
     logger.info("Audio-Warteschlange (Worker) gestartet.")
@@ -452,7 +479,7 @@ def worker_loop():
             alarm_queue.task_done()
 
         except Exception as e:
-            logger.error(f"Fehler im Audio-Worker-Ablauf: {e}")
+            logger.exception(f"Fehler im Audio-Worker-Ablauf: ")
             alarm_queue.task_done()
 
 threading.Thread(target=worker_loop, daemon=True).start()
@@ -528,7 +555,7 @@ def process_alarm_logic(data_dict: dict):
                     logger.info(f"Rufe Webhook auf: {url}")
                     requests.get(url, timeout=5)
                 except Exception as e:
-                    logger.error(f"Fehler beim Webhook-Aufruf: {e}")
+                    logger.exception(f"Fehler beim Webhook-Aufruf: ")
             threading.Thread(target=call_webhook, args=(webhook_url,), daemon=True).start()
 
         repeats = cfg_live.get("repeatAlert", []) 
@@ -559,7 +586,8 @@ def scheduled_reconnect_loop():
         if sio.connected:
             try:
                 sio.disconnect()
-            except Exception: pass
+            except Exception as e:
+            logger.exception("Unhandled exception ignored:")
 
 def login_external():
     cfg_live = load_config()
@@ -634,7 +662,7 @@ def api_update_check(session_token: Optional[str] = Cookie(None)):
             update_available = (is_newer and latest_version.startswith("v"))
             return {"current": current_version, "latest": latest_version, "update_available": update_available}
     except Exception as e:
-        logger.error(f"Fehler beim Prüfen auf Updates: {e}")
+        logger.exception(f"Fehler beim Prüfen auf Updates: ")
     return {"current": current_version, "latest": current_version, "update_available": False}
 
 @app.post("/api/update_run")
@@ -684,13 +712,13 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                     c["version"] = latest_version
                     save_config(c)
                 except Exception as ex:
-                    logger.error(f"Konnte neue Version nicht in config.json schreiben: {ex}")
+                    logger.exception(f"Konnte neue Version nicht in config.json schreiben: ")
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
             os.execv(sys.executable, [sys.executable] + sys.argv)
         except Exception as e:
-            logger.error(f"Fehler beim Update: {e}")
+            logger.exception(f"Fehler beim Update: ")
             # Auch bei Fehler Config zurückspielen
             if os.path.exists(os.path.join(cwd, CONFIG_FILE + ".bak")):
                 shutil.copy(os.path.join(cwd, CONFIG_FILE + ".bak"), os.path.join(cwd, CONFIG_FILE))
@@ -814,7 +842,8 @@ def api_clear_queue():
     if pygame.mixer.get_init():
         pygame.mixer.music.stop()
         try: pygame.mixer.music.unload()
-        except: pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
     
     logger.info(f"Warteschlange gelöscht! {count} aktive Timer beendet.")
     return {"status": "Stopped", "cancelled_timers": count}
@@ -827,7 +856,7 @@ def api_get_audio_devices():
         devices = sdl2_audio.get_audio_device_names(False)
         return {"devices": devices}
     except Exception as e:
-        logger.error(f"Fehler beim Abrufen der Audio-Geräte: {e}")
+        logger.exception(f"Fehler beim Abrufen der Audio-Geräte: ")
         return {"devices": []}
 
 @app.get("/api/syslog", dependencies=[Depends(verify_session)])
@@ -1014,8 +1043,8 @@ def api_get_network_status():
                         status["ssid"] = val
             if not status.get("ssid"):
                 status["mode"] = "lan"
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
             
     elif system == "Linux":
         try:
@@ -1027,8 +1056,8 @@ def api_get_network_status():
                         status["mode"] = "wlan"
                         status["ssid"] = parts[3].strip().replace('\\:', ':')
                         break
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception("Unhandled exception ignored:")
             
     return status
 
@@ -1046,7 +1075,7 @@ def api_get_wifi_networks():
                     if ssid and ssid not in networks:
                         networks.append(ssid)
         except Exception as e:
-            logger.error(f"Fehler beim WLAN-Scan (Windows): {e}")
+            logger.exception(f"Fehler beim WLAN-Scan (Windows): ")
             
     elif system == "Linux":
         try:
@@ -1056,7 +1085,7 @@ def api_get_wifi_networks():
                 if ssid and ssid not in networks:
                     networks.append(ssid)
         except Exception as e:
-            logger.error(f"Fehler beim WLAN-Scan (Linux). nmcli installiert?: {e}")
+            logger.exception(f"Fehler beim WLAN-Scan (Linux). nmcli installiert?: ")
             
     return {"networks": networks}
 
@@ -1176,7 +1205,7 @@ def start_socket_service():
                 )
                 sio.wait()
             except Exception as e:
-                logger.error(f"Socket.io Verbindung getrennt oder Fehler: {e}")
+                logger.exception(f"Socket.io Verbindung getrennt oder Fehler: ")
                 if sio.connected:
                     sio.disconnect()
         else:
