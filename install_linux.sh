@@ -23,6 +23,10 @@ if ! command -v nmcli &> /dev/null; then
     PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
 fi
 
+if ! command -v wpa_supplicant &> /dev/null; then
+    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL wpasupplicant wireless-tools iw rfkill"
+fi
+
 if ! command -v aplay &> /dev/null; then
     PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL alsa-utils"
 fi
@@ -65,8 +69,19 @@ echo "Starte NetworkManager neu (LAN-Verbindung könnte kurz abbrechen)..."
 sudo systemctl enable NetworkManager || true
 sudo systemctl restart NetworkManager || true
 
-# 1.5.1 DietPi Blacklists (Blockaden) restlos entfernen
-echo ">>> [1.5/6b] Zerstöre DietPi-Kernel-Blockaden (Blacklists)..."
+# 1.5.1 DietPi Blacklists und Hardware-Sperren (Device-Tree) restlos entfernen
+echo ">>> [1.5/6b] Zerstöre DietPi-Kernel-Blockaden (Blacklists & Overlays)..."
+
+# Entferne Hardware-Sperre in den Boot-Konfigurationen (sonst sagt NM "hardware missing")
+for CONFIG_FILE in /boot/config.txt /boot/firmware/config.txt /boot/dietpi.txt; do
+    if [ -f "$CONFIG_FILE" ]; then
+        if grep -q "disable-wifi" "$CONFIG_FILE"; then
+            echo "Entferne WLAN-Hardwaresperre in $CONFIG_FILE..."
+            sudo sed -i 's/^.*disable-wifi.*$/#dtoverlay=disable-wifi/g' "$CONFIG_FILE"
+        fi
+    fi
+done
+
 # DietPi blockiert WLAN und Audio per modprobe-Blacklist, wenn in dietpi.txt nicht aktiviert
 sudo rm -f /etc/modprobe.d/dietpi-disable_wifi.conf 2>/dev/null || true
 sudo rm -f /etc/modprobe.d/dietpi-disable_audio.conf 2>/dev/null || true
@@ -88,8 +103,8 @@ After=network.target dietpi-postboot.service NetworkManager.service docker.servi
 
 [Service]
 Type=oneshot
-# Entsperre WLAN Hardware (rfkill) und schalte Radio an
-ExecStart=/bin/bash -c 'rfkill unblock wifi || true; rfkill unblock wlan || true; nmcli radio wifi on || true'
+# Entsperre WLAN Hardware (rfkill), bringe wlan0 hoch und schalte Radio an
+ExecStart=/bin/bash -c 'rfkill unblock wifi || true; rfkill unblock wlan || true; ip link set wlan0 up || true; nmcli dev set wlan0 managed yes || true; nmcli radio wifi on || true'
 RemainAfterExit=yes
 
 [Install]
