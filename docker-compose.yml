@@ -23,6 +23,8 @@ services:
     privileged: true
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+      - XDG_RUNTIME_DIR=/tmp/runtime-root
+      - SDL_AUDIODRIVER=alsa
     volumes:
       - "/dev/snd:/dev/snd"
       - ./:/app

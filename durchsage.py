@@ -604,7 +604,9 @@ def login_external():
         )
         resp.raise_for_status()
         return True
-    except Exception: return False
+    except Exception as e:
+        logger.exception(f"Login failed: {e}")
+        return False
 
 # --- WEB UI API ENDPOINTS ---
 
