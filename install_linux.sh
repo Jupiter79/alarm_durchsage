@@ -23,6 +23,10 @@ if ! command -v nmcli &> /dev/null; then
     PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
 fi
 
+if ! command -v aplay &> /dev/null; then
+    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL alsa-utils"
+fi
+
 if [ -n "$PACKAGES_TO_INSTALL" ]; then
     echo "Installiere fehlende Pakete: $PACKAGES_TO_INSTALL"
     sudo apt-get update -y
@@ -50,14 +54,43 @@ echo "Starte NetworkManager neu..."
 sudo systemctl enable NetworkManager || true
 sudo systemctl restart NetworkManager || true
 
-# 1.6 DietPi WLAN-Sperre aufheben
-echo ">>> [1.6/6] WLAN-Sperre (rfkill) aufheben..."
+# 1.5.1 DietPi Blacklists (Blockaden) restlos entfernen
+echo ">>> [1.5/6b] Zerstöre DietPi-Kernel-Blockaden (Blacklists)..."
+# DietPi blockiert WLAN und Audio per modprobe-Blacklist, wenn in dietpi.txt nicht aktiviert
+sudo rm -f /etc/modprobe.d/dietpi-disable_wifi.conf 2>/dev/null || true
+sudo rm -f /etc/modprobe.d/dietpi-disable_audio.conf 2>/dev/null || true
+sudo rm -f /etc/modprobe.d/dietpi-disable_bluetooth.conf 2>/dev/null || true
+
+# 1.6 DietPi WLAN-Sperre aufheben & dauerhaften Fix installieren
+echo ">>> [1.6/6] Installiere permanenten WLAN-Wachhund für Reboots..."
 sudo rfkill unblock wifi || true
 sudo rfkill unblock wlan || true
-# NetworkManager zwingen, WLAN einzuschalten
 if command -v nmcli &> /dev/null; then
     sudo nmcli radio wifi on || true
 fi
+
+# Erstelle einen Systemdienst, der DietPis Boot-Skripte nachträglich überschreibt
+cat << 'EOF' | sudo tee /etc/systemd/system/alarm-network-fix.service
+[Unit]
+Description=Alarmdurchsage Network Fix for DietPi
+# Wir warten ab, bis DietPi und das normale Netzwerk fertig geladen haben
+After=network.target dietpi-postboot.service NetworkManager.service docker.service
+
+[Service]
+Type=oneshot
+# 1. Beende stur laufende DietPi wpa_supplicant Instanzen
+# 2. Entsperre WLAN Hardware
+# 3. Zwinge NetworkManager zur Übernahme
+ExecStart=/bin/bash -c 'killall wpa_supplicant || true; rfkill unblock wifi || true; rfkill unblock wlan || true; ip link set wlan0 up || true; nmcli dev set wlan0 managed yes || true; nmcli radio wifi on || true'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable alarm-network-fix.service
+sudo systemctl start alarm-network-fix.service
 
 # 1.7 DietPi Audio aktivieren
 echo ">>> [1.7/6] Aktiviere Onboard-Audio permanent..."
