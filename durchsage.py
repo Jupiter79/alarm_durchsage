@@ -587,7 +587,7 @@ def scheduled_reconnect_loop():
             try:
                 sio.disconnect()
             except Exception as e:
-            logger.exception("Unhandled exception ignored:")
+                logger.exception("Unhandled exception ignored:")
 
 def login_external():
     cfg_live = load_config()
