@@ -3,7 +3,7 @@ set -e
 
 echo "====================================================="
 echo " Alarmdurchsage - DietPi Installer"
-echo " (Optimiert für DietPi mit NetworkManager)"
+echo " (Optimiert für DietPi mit NetworkManager & Audio)"
 echo "====================================================="
 
 # 1. Grundlegende Werkzeuge prüfen und installieren
@@ -49,6 +49,37 @@ fi
 echo "Starte NetworkManager neu..."
 sudo systemctl enable NetworkManager || true
 sudo systemctl restart NetworkManager || true
+
+# 1.6 DietPi WLAN-Sperre aufheben
+echo ">>> [1.6/6] WLAN-Sperre (rfkill) aufheben..."
+sudo rfkill unblock wifi || true
+sudo rfkill unblock wlan || true
+# NetworkManager zwingen, WLAN einzuschalten
+if command -v nmcli &> /dev/null; then
+    sudo nmcli radio wifi on || true
+fi
+
+# 1.7 DietPi Audio aktivieren
+echo ">>> [1.7/6] Aktiviere Onboard-Audio permanent..."
+# In config.txt eintragen
+for CONFIG_FILE in /boot/config.txt /boot/firmware/config.txt; do
+    if [ -f "$CONFIG_FILE" ]; then
+        if ! grep -q "^dtparam=audio=on" "$CONFIG_FILE"; then
+            echo "Aktiviere Audio in $CONFIG_FILE"
+            echo "dtparam=audio=on" | sudo tee -a "$CONFIG_FILE"
+        fi
+    fi
+done
+
+# Kernel-Modul in den Autostart (beim Booten) eintragen
+if ! grep -q "^snd_bcm2835" /etc/modules 2>/dev/null; then
+    echo "Füge snd_bcm2835 zu /etc/modules hinzu..."
+    echo "snd_bcm2835" | sudo tee -a /etc/modules
+fi
+
+# Kernel-Modul SOFORT laden (wichtig für die erste Docker-Ausführung, sonst fehlt /dev/snd)
+echo "Lade Soundkarten-Treiber..."
+sudo modprobe snd_bcm2835 || true
 
 # 2. Docker installieren (falls noch nicht vorhanden)
 echo ">>> [2/6] Prüfe Docker-Installation..."
@@ -102,4 +133,6 @@ echo ""
 echo " Die Weboberfläche ist in wenigen Sekunden erreichbar unter:"
 echo " -> http://${IP_ADDR}:8122"
 echo " -> http://alarmdurchsage.local:8122 (falls der Hostname so lautet)"
+echo " WICHTIG: Wenn du DietPi nutzt, starte den Pi jetzt am besten"
+echo " einmal neu mit dem Befehl: sudo reboot"
 echo "====================================================="
