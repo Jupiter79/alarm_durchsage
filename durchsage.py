@@ -1194,6 +1194,8 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 def start_socket_service():
     global connection_error_msg, last_disconnect_time
+    retry_delay = 5
+    max_delay = 300  # Maximal 5 Minuten warten
     while True:
         if login_external():
             connection_error_msg = None
@@ -1205,16 +1207,21 @@ def start_socket_service():
                     cfg_live["credentials"]["base_url"],
                     headers={"Cookie": cookie_str}
                 )
+                retry_delay = 5  # Reset bei erfolgreicher Verbindung
                 sio.wait()
             except Exception as e:
                 logger.exception(f"Socket.io Verbindung getrennt oder Fehler: ")
                 if sio.connected:
                     sio.disconnect()
+                retry_delay = min(retry_delay * 2, max_delay)
+                logger.info(f"Warte {retry_delay} Sekunden vor dem nächsten Verbindungsversuch...")
         else:
             connection_error_msg = "Login fehlgeschlagen. Bitte Zugangsdaten für feuerwehreinsatz.info in den Einstellungen prüfen!"
             if last_disconnect_time is None:
                 last_disconnect_time = time.time()
-        time.sleep(5)
+            retry_delay = min(retry_delay * 2, max_delay)
+            logger.warning(f"Login fehlgeschlagen. Warte {retry_delay} Sekunden vor dem nächsten Versuch...")
+        time.sleep(retry_delay)
 
 
 if __name__ == "__main__":
