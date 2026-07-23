@@ -871,6 +871,25 @@ async function restartSystem() {
     }
 }
 
+async function uninstallSystem() {
+    if (confirm("⚠️ ACHTUNG: Willst du die Alarmdurchsage wirklich komplett DEINSTALLIEREN?\n\nAlle Dateien, Konfigurationen und Einstellungen werden unwiderruflich gelöscht. Bei Docker-Installationen wird der gesamte Container zerstört.")) {
+        if (confirm("⚠️ LETZTE WARNUNG: Bist du absolut sicher? Dies kann NICHT rückgängig gemacht werden!")) {
+            try {
+                const res = await fetch('/api/uninstall', { method: 'POST' });
+                if (res.ok) {
+                    alert("Deinstallation erfolgreich gestartet. Das System zerstört sich nun selbst und wird beendet. Auf Wiedersehen!");
+                    document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh; color:#dc3545;'>System wurde deinstalliert.</h1><p style='text-align:center;'>Du kannst dieses Fenster nun schließen.</p>";
+                } else {
+                    alert("Fehler bei der Deinstallation. Prüfe die Logs.");
+                }
+            } catch (e) {
+                alert("Deinstallation gestartet. Die Verbindung wurde getrennt.");
+                document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh; color:#dc3545;'>System wird deinstalliert...</h1><p style='text-align:center;'>Du kannst dieses Fenster nun schließen.</p>";
+            }
+        }
+    }
+}
+
 window.scanWifi = async function () {
     const select = document.getElementById('wifi-ssid');
     const prevValue = select.value;

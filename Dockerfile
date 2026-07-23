@@ -13,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsdl2-ttf-2.0-0 \
     git \
     network-manager \
+    docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 # Arbeitsverzeichnis im Container setzen

@@ -901,6 +901,71 @@ def api_restart():
     threading.Thread(target=do_restart, daemon=True).start()
     return {"status": "ok", "message": "Neustart eingeleitet..."}
 
+@app.post("/api/uninstall")
+def api_uninstall(session_token: Optional[str] = Cookie(None)):
+    if session_token not in active_sessions:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    logger.warning("Benutzer hat Deinstallation angefordert. Führe Uninstaller aus...")
+    
+    def do_uninstall():
+        time.sleep(2)
+        install_dir = os.path.dirname(os.path.abspath(__file__))
+        is_docker = os.path.exists("/.dockerenv")
+        
+        if is_docker:
+            logger.info("Docker Installation erkannt. Lösche Container...")
+            try:
+                subprocess.Popen(["docker", "compose", "down", "--rmi", "all", "-v"], cwd=install_dir)
+            except Exception as e:
+                logger.error(f"Docker uninstall failed: {e}")
+            os._exit(0)
+        
+        elif platform.system() == "Windows":
+            logger.info("Windows Native Installation erkannt. Erstelle Uninstall-Skript...")
+            import tempfile
+            temp_dir = tempfile.gettempdir()
+            bat_path = os.path.join(temp_dir, "alarm_durchsage_uninstall.bat")
+            
+            appdata = os.environ.get('APPDATA', '')
+            shortcut_path = os.path.join(appdata, "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "AlarmDurchsage.lnk")
+            
+            with open(bat_path, "w", encoding="utf-8") as f:
+                f.write("@echo off\n")
+                f.write("timeout /t 2 /nobreak >nul\n")
+                f.write(f"taskkill /F /PID {os.getpid()} >nul 2>&1\n")
+                f.write(f"if exist \"{shortcut_path}\" del /f /q \"{shortcut_path}\"\n")
+                f.write(f"timeout /t 1 /nobreak >nul\n")
+                f.write(f"rmdir /s /q \"{install_dir}\"\n")
+                f.write(f"del \"%~f0\"\n")
+            
+            CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000)
+            subprocess.Popen(["cmd.exe", "/c", "start", "/b", '""', bat_path], creationflags=CREATE_NO_WINDOW)
+            os._exit(0)
+            
+        else:
+            logger.info("Linux Native Installation erkannt. Erstelle Uninstall-Skript...")
+            sh_path = "/tmp/alarm_durchsage_uninstall.sh"
+            with open(sh_path, "w", encoding="utf-8", newline='\n') as f:
+                f.write("#!/bin/bash\n")
+                f.write("sleep 2\n")
+                f.write(f"kill -9 {os.getpid()} 2>/dev/null || true\n")
+                f.write("if systemctl is-active --quiet alarm-network-fix.service; then\n")
+                f.write("  systemctl stop alarm-network-fix.service || true\n")
+                f.write("  systemctl disable alarm-network-fix.service || true\n")
+                f.write("  rm -f /etc/systemd/system/alarm-network-fix.service\n")
+                f.write("  systemctl daemon-reload || true\n")
+                f.write("fi\n")
+                f.write(f"rm -rf \"{install_dir}\"\n")
+                f.write(f"rm -f \"$0\"\n")
+            
+            os.chmod(sh_path, 0o777)
+            subprocess.Popen(["nohup", "bash", sh_path], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid)
+            os._exit(0)
+
+    threading.Thread(target=do_uninstall, daemon=True).start()
+    return {"status": "ok", "message": "Deinstallation gestartet. System wird entfernt..."}
+
 @app.get("/api/is_active")
 def api_is_active_mission():
     dept_info = get_department_status_data()
