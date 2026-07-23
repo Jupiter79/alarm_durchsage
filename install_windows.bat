@@ -34,12 +34,17 @@ cd /d "%INSTALL_DIR%"
 :: 3. Python-Pakete installieren
 echo.
 echo [3/5] Installiere Python-Abhaengigkeiten...
-:: Versuche 'py' (Python Launcher), falls 'python' nicht im PATH ist
-py -m pip --version >nul 2>&1
+:: Versuche 'py -3.11' (Python Launcher), da Python 3.11 zuvor installiert wurde
+py -3.11 -m pip --version >nul 2>&1
 if %ERRORLEVEL% EQU 0 (
-    set "PYTHON_CMD=py"
+    set "PYTHON_CMD=py -3.11"
 ) else (
-    set "PYTHON_CMD=python"
+    py -m pip --version >nul 2>&1
+    if %ERRORLEVEL% EQU 0 (
+        set "PYTHON_CMD=py"
+    ) else (
+        set "PYTHON_CMD=python"
+    )
 )
 
 %PYTHON_CMD% -m pip install --upgrade pip
