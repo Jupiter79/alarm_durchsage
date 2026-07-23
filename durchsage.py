@@ -718,7 +718,15 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+            if platform.system() == "Windows":
+                vbs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_alarm_durchsage.vbs")
+                if os.path.exists(vbs_path):
+                    os.startfile(vbs_path)
+                    os._exit(0)
+                else:
+                    os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
+            else:
+                os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
         except Exception as e:
             logger.exception(f"Fehler beim Update: ")
             # Auch bei Fehler Config zurückspielen
