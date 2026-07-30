@@ -38,12 +38,43 @@ CONFIG_FILE = "config.json"
 
 def load_config():
     if not os.path.exists(CONFIG_FILE):
-        default_config_path = "config.default.json"
-        if os.path.exists(default_config_path):
-            shutil.copy(default_config_path, CONFIG_FILE)
-            logger.info(f"{CONFIG_FILE} wurde aus {default_config_path} erstellt.")
-        else:
-            raise FileNotFoundError(f"Weder {CONFIG_FILE} noch {default_config_path} gefunden!")
+        default_cfg = {
+            "repeatAlert": [1.5, 3, 4.5],
+            "server": {"host": "0.0.0.0"},
+            "ui": {"port": 8122, "password": "122", "password_changed": False, "alarm_mode": "full"},
+            "credentials": {"base_url": "https://feuerwehr.einsatz.or.at", "username": "", "password": ""},
+            "connection": {"reconnect_hours": 19},
+            "audio": {"voice": "de-DE-KillianNeural", "gain_db": 9, "rate": "-10%", "gong_pause_sec": 1, "output_device": ""},
+            "logging": {"file": "log.json", "retention_days": 365},
+            "gongs": [
+                {"id": 1, "name": "Einsatz", "is_alarm": True},
+                {"id": 2, "name": "Folgeeinsatz", "is_alarm": True},
+                {"id": 3, "name": "Jugend-Einsatz", "is_alarm": True},
+                {"id": 4, "name": "Durchsage", "is_alarm": False},
+                {"id": 5, "name": "Durchsage (ÖBB)", "is_alarm": False}
+            ],
+            "text_processing": {
+                "abbreviations": {
+                    "Pol": "Polizei", "verm.": "vermutlich", "vmlt.": "vermutlich", "EO": "Einsatzort",
+                    "EL": "Einsatzleiter", ".OG": "Obergeschoss", "RD": "Rettungsdienst", "RK": "Rotes Kreuz",
+                    "BMA": "Brandmeldeanlage", "med.": "medizinischer", "OG": "Obergeschoss", "GH": "Gasthaus",
+                    "KH": "Krankenhaus", "kg": "Kilogramm", "TP": "Treffpunkt"
+                },
+                "keyword_mapping": {
+                    "BMA": "Brandmeldealarm", "T UNWETTER": "Unwettereinsatz", "T SCHADSTOFF": "Schadstoffeinsatz",
+                    "T VU": "Verkehrsunfall", "T PERSON": "Technischer Einsatz, Person in Gefahr",
+                    "WASSER": "Wasserdiensteinsatz", "FLUGNOT": "Notlage Luftfahrzeug",
+                    "T WASSER": "Technischer Einsatz auf Gewässer", "T PERSON WASSER": "Personenrettung auf Gewässer"
+                },
+                "address_replacements": {
+                    ">": "Fahrtrichtung", "UFT": "Unterflurtrasse", "AS": "Anschlussstelle", "Km": "Kilometer"
+                }
+            },
+            "webhook": {"url": ""}
+        }
+        with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+            json.dump(default_cfg, f, indent=4, ensure_ascii=False)
+        logger.info(f"{CONFIG_FILE} wurde mit Standardwerten erstellt.")
 
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         c = json.load(f)
