@@ -1034,7 +1034,7 @@ def api_uninstall(session_token: Optional[str] = Cookie(None)):
                 f.write(f"del \"%~f0\"\n")
             
             CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000)
-            subprocess.Popen(["cmd.exe", "/c", "start", "/b", '""', bat_path], creationflags=CREATE_NO_WINDOW, cwd=temp_dir)
+            subprocess.Popen(["cmd.exe", "/c", "start", "/b", "", bat_path], creationflags=CREATE_NO_WINDOW, cwd=temp_dir)
             os._exit(0)
             
         else:
