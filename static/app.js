@@ -340,6 +340,18 @@ async function checkSystemStatus() {
                 if (ce) ce.style.display = 'none';
             }
 
+            // OS Dependent UI
+            const navItem = document.getElementById('nav-item-internet');
+            const uninstallContainer = document.getElementById('uninstall-container');
+            
+            if (status.os === 'Windows') {
+                if (navItem) navItem.style.display = 'none';
+                if (uninstallContainer) uninstallContainer.style.display = 'block';
+            } else {
+                if (navItem) navItem.style.display = 'block';
+                if (uninstallContainer) uninstallContainer.style.display = 'none';
+            }
+
             if (!status.ffmpeg_installed) {
                 document.getElementById('ffmpeg-warning').style.display = 'block';
                 // Disable manual announce button
@@ -353,17 +365,9 @@ async function checkSystemStatus() {
                 if (status.os === 'Windows') {
                     document.getElementById('ffmpeg-cmd-win').style.display = 'block';
                     document.getElementById('ffmpeg-cmd-lin').style.display = 'none';
-                    const navItem = document.getElementById('nav-item-internet');
-                    if (navItem) navItem.style.display = 'none';
-                    const uninstallContainer = document.getElementById('uninstall-container');
-                    if (uninstallContainer) uninstallContainer.style.display = 'block';
                 } else {
                     document.getElementById('ffmpeg-cmd-win').style.display = 'none';
                     document.getElementById('ffmpeg-cmd-lin').style.display = 'block';
-                    const navItem = document.getElementById('nav-item-internet');
-                    if (navItem) navItem.style.display = 'block';
-                    const uninstallContainer = document.getElementById('uninstall-container');
-                    if (uninstallContainer) uninstallContainer.style.display = 'none';
                 }
             } else {
                 document.getElementById('ffmpeg-warning').style.display = 'none';
