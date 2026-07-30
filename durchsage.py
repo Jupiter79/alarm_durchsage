@@ -717,15 +717,36 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
-            if platform.system() == "Windows":
-                vbs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_alarm_durchsage.vbs")
-                if os.path.exists(vbs_path):
-                    os.startfile(vbs_path)
-                    os._exit(0)
+            
+            is_docker = os.path.exists("/.dockerenv")
+            if is_docker:
+                logger.info("Docker Installation erkannt. Baue und starte Container neu...")
+                try:
+                    services = subprocess.check_output(["docker", "compose", "ps", "--services"], text=True, cwd=cwd).strip().split('\n')
+                    services = [s for s in services if s]
+                    if services:
+                        subprocess.run(["docker", "compose", "up", "-d", "--build"] + services, check=True, cwd=cwd)
+                    else:
+                        subprocess.run(["docker", "compose", "up", "-d", "--build"], check=True, cwd=cwd)
+                except Exception as ex:
+                    logger.error(f"Fehler beim Docker Compose Build/Restart: {ex}")
+                os._exit(0)
+            else:
+                logger.info("Native Installation erkannt. Installiere mögliche neue Abhängigkeiten...")
+                try:
+                    subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], check=True, cwd=cwd)
+                except Exception as ex:
+                    logger.error(f"Fehler bei pip install: {ex}")
+                
+                if platform.system() == "Windows":
+                    vbs_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "start_alarm_durchsage.vbs")
+                    if os.path.exists(vbs_path):
+                        os.startfile(vbs_path)
+                        os._exit(0)
+                    else:
+                        os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
                 else:
                     os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
-            else:
-                os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
         except Exception as e:
             logger.exception(f"Fehler beim Update: ")
             # Auch bei Fehler Config zurückspielen
