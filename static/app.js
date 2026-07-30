@@ -932,6 +932,20 @@ window.loadNetworkStatus = async function () {
         const res = await fetch('/api/network/status');
         if (res.ok) {
             const data = await res.json();
+            
+            if (data.mode === 'disabled' || data.os === 'Windows') {
+                const navItem = document.querySelector('a[onclick="switchTab(\'internet\')"]');
+                if (navItem) {
+                    navItem.parentElement.style.display = 'none';
+                }
+                // Also hide the tab content itself if it was somehow active
+                const tabContent = document.getElementById('tab-internet');
+                if (tabContent) {
+                    tabContent.style.display = 'none';
+                }
+                return;
+            }
+            
             if (data.mode === 'wlan' && data.ssid) {
                 const wlanRadio = document.querySelector('input[name="internet_mode"][value="wlan"]');
                 if (wlanRadio) {

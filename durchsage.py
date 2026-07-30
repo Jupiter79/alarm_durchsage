@@ -17,7 +17,6 @@ from contextlib import asynccontextmanager
 
 import subprocess
 import platform
-import xml.sax.saxutils
 
 import requests
 import socketio
@@ -1104,24 +1103,13 @@ def api_get_gong_audio(gong_id: int):
 @app.get("/api/network/status", dependencies=[Depends(verify_session)])
 def api_get_network_status():
     system = platform.system()
-    status = {"mode": "lan", "ssid": None}
     
     if system == "Windows":
-        try:
-            result = subprocess.check_output(['netsh', 'wlan', 'show', 'interfaces'], shell=True, text=True, encoding='cp850', errors='ignore')
-            for line in result.splitlines():
-                if "State" in line and "connected" in line:
-                    status["mode"] = "wlan"
-                elif "SSID" in line and "BSSID" not in line and ":" in line:
-                    val = line.split(":", 1)[1].strip()
-                    if val:
-                        status["ssid"] = val
-            if not status.get("ssid"):
-                status["mode"] = "lan"
-        except Exception as e:
-            logger.exception("Unhandled exception ignored:")
-            
-    elif system == "Linux":
+        return {"mode": "disabled", "os": "Windows"}
+
+    status = {"mode": "lan", "ssid": None}
+    
+    if system == "Linux":
         try:
             result = subprocess.check_output(['nmcli', '-t', '-f', 'DEVICE,TYPE,STATE,CONNECTION', 'dev'], text=True)
             for line in result.splitlines():
@@ -1139,20 +1127,13 @@ def api_get_network_status():
 @app.get("/api/network/wifi", dependencies=[Depends(verify_session)])
 def api_get_wifi_networks():
     system = platform.system()
-    networks = []
     
     if system == "Windows":
-        try:
-            result = subprocess.check_output(['netsh', 'wlan', 'show', 'networks'], shell=True, text=True, encoding='cp850', errors='ignore')
-            for line in result.splitlines():
-                if "SSID" in line and ":" in line:
-                    ssid = line.split(":", 1)[1].strip()
-                    if ssid and ssid not in networks:
-                        networks.append(ssid)
-        except Exception as e:
-            logger.exception(f"Fehler beim WLAN-Scan (Windows): ")
-            
-    elif system == "Linux":
+        raise HTTPException(status_code=403, detail="Network scanning not supported on Windows")
+
+    networks = []
+    
+    if system == "Linux":
         try:
             result = subprocess.check_output(['nmcli', '-t', '-f', 'SSID', 'dev', 'wifi'], text=True)
             for line in result.splitlines():
@@ -1173,16 +1154,11 @@ class NetworkConnectRequest(BaseModel):
 def api_network_connect(req: NetworkConnectRequest):
     system = platform.system()
     
+    if system == "Windows":
+        raise HTTPException(status_code=403, detail="Network configuration not supported on Windows")
+        
     if req.mode == "lan":
-        if system == "Windows":
-            try:
-                res = subprocess.run(['netsh', 'wlan', 'disconnect'], capture_output=True, text=True, encoding='cp850', errors='ignore')
-                if res.returncode != 0:
-                    raise Exception(res.stdout + res.stderr)
-                return {"status": "ok", "message": "WLAN getrennt. LAN wird verwendet."}
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
-        elif system == "Linux":
+        if system == "Linux":
             try:
                 subprocess.check_call(['nmcli', 'radio', 'wifi', 'off'])
                 return {"status": "ok", "message": "WLAN deaktiviert. LAN wird verwendet."}
@@ -1193,58 +1169,7 @@ def api_network_connect(req: NetworkConnectRequest):
         if not req.ssid:
             raise HTTPException(status_code=400, detail="SSID fehlt.")
             
-        if system == "Windows":
-            # XML Escape um Fehler bei Sonderzeichen (&, <, >) im WLAN-Namen oder Passwort zu verhindern
-            safe_ssid = xml.sax.saxutils.escape(req.ssid)
-            safe_password = xml.sax.saxutils.escape(req.password or "")
-            
-            xml_profile = f"""<?xml version="1.0"?>
-<WLANProfile xmlns="http://www.microsoft.com/networking/WLAN/profile/v1">
-    <name>{safe_ssid}</name>
-    <SSIDConfig>
-        <SSID>
-            <name>{safe_ssid}</name>
-        </SSID>
-    </SSIDConfig>
-    <connectionType>ESS</connectionType>
-    <connectionMode>auto</connectionMode>
-    <MSM>
-        <security>
-            <authEncryption>
-                <authentication>WPA2PSK</authentication>
-                <encryption>AES</encryption>
-                <useOneX>false</useOneX>
-            </authEncryption>
-            <sharedKey>
-                <keyType>passPhrase</keyType>
-                <protected>false</protected>
-                <keyMaterial>{safe_password}</keyMaterial>
-            </sharedKey>
-        </security>
-    </MSM>
-</WLANProfile>"""
-            try:
-                profile_path = "temp_wifi_profile.xml"
-                with open(profile_path, "w", encoding="utf-8") as f:
-                    f.write(xml_profile)
-                
-                res_add = subprocess.run(['netsh', 'wlan', 'add', 'profile', f'filename={profile_path}'], capture_output=True, text=True, encoding='cp850', errors='ignore')
-                if res_add.returncode != 0:
-                    raise Exception(f"Profile add failed: {res_add.stdout} {res_add.stderr}")
-                    
-                os.remove(profile_path)
-                
-                res_conn = subprocess.run(['netsh', 'wlan', 'connect', f'name={req.ssid}'], capture_output=True, text=True, encoding='cp850', errors='ignore')
-                if res_conn.returncode != 0:
-                    raise Exception(f"Connect failed: {res_conn.stdout} {res_conn.stderr}")
-                    
-                return {"status": "ok", "message": f"Verbinde mit {req.ssid}..."}
-            except Exception as e:
-                if os.path.exists("temp_wifi_profile.xml"):
-                    os.remove("temp_wifi_profile.xml")
-                raise HTTPException(status_code=500, detail=f"WLAN Fehler (Windows): {e}")
-                
-        elif system == "Linux":
+        if system == "Linux":
             try:
                 subprocess.check_call(['nmcli', 'radio', 'wifi', 'on'])
                 cmd = ['nmcli', 'dev', 'wifi', 'connect', req.ssid]
