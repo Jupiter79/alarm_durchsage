@@ -143,7 +143,7 @@ if platform.system() == "Windows":
         from PIL import Image, ImageDraw
 
         def create_tray_image(color):
-            img = Image.new('RGB', (64, 64), color=(0, 0, 0))
+            img = Image.new('RGBA', (64, 64), color=(0, 0, 0, 0))
             dc = ImageDraw.Draw(img)
             dc.ellipse((8, 8, 56, 56), fill=color)
             return img
