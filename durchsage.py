@@ -37,6 +37,14 @@ from pydantic import BaseModel, ConfigDict
 CONFIG_FILE = "config.json"
 
 def load_config():
+    if not os.path.exists(CONFIG_FILE):
+        default_config_path = "config.default.json"
+        if os.path.exists(default_config_path):
+            shutil.copy(default_config_path, CONFIG_FILE)
+            logger.info(f"{CONFIG_FILE} wurde aus {default_config_path} erstellt.")
+        else:
+            raise FileNotFoundError(f"Weder {CONFIG_FILE} noch {default_config_path} gefunden!")
+
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         c = json.load(f)
         
