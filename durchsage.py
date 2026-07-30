@@ -744,7 +744,8 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                         os.startfile(vbs_path)
                         os._exit(0)
                     else:
-                        os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
+                        subprocess.Popen([sys.executable, os.path.abspath(__file__)])
+                        os._exit(0)
                 else:
                     os.execv(sys.executable, [sys.executable, os.path.abspath(__file__)])
         except Exception as e:
