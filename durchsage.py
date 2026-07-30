@@ -676,7 +676,17 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
         try:
             cwd = os.path.dirname(os.path.abspath(__file__))
             
-            # Sichern
+            # Sichern in Memory und als Datei
+            memory_cfg = None
+            memory_log = None
+            try:
+                memory_cfg = load_config()
+                if os.path.exists(os.path.join(cwd, "log.json")):
+                    with open(os.path.join(cwd, "log.json"), "r", encoding="utf-8") as f:
+                        memory_log = json.load(f)
+            except Exception:
+                pass
+
             if os.path.exists(os.path.join(cwd, CONFIG_FILE)):
                 shutil.copy(os.path.join(cwd, CONFIG_FILE), os.path.join(cwd, CONFIG_FILE + ".bak"))
             if os.path.exists(os.path.join(cwd, "log.json")):
@@ -690,13 +700,31 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             if latest_version:
                 subprocess.run(["git", "reset", "--hard"], check=True, cwd=cwd)
                 subprocess.run(["git", "checkout", latest_version], check=True, cwd=cwd)
-            
-            # Wiederherstellen
-            if os.path.exists(os.path.join(cwd, CONFIG_FILE + ".bak")):
-                shutil.copy(os.path.join(cwd, CONFIG_FILE + ".bak"), os.path.join(cwd, CONFIG_FILE))
-            if os.path.exists(os.path.join(cwd, "log.json.bak")):
-                shutil.copy(os.path.join(cwd, "log.json.bak"), os.path.join(cwd, "log.json"))
                 
+                # Sicherstellen, dass config nicht getrackt wird, um künftige git reset wipes zu vermeiden
+                subprocess.run(["git", "rm", "--cached", "config.json", "log.json"], cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            # Wiederherstellen aus Memory (100% sicher gegen Datei-Wipe)
+            if memory_cfg:
+                if latest_version:
+                    memory_cfg["version"] = latest_version
+                save_config(memory_cfg)
+            elif os.path.exists(os.path.join(cwd, CONFIG_FILE + ".bak")):
+                shutil.copy(os.path.join(cwd, CONFIG_FILE + ".bak"), os.path.join(cwd, CONFIG_FILE))
+                if latest_version:
+                    try:
+                        c = load_config()
+                        c["version"] = latest_version
+                        save_config(c)
+                    except Exception:
+                        pass
+                
+            if memory_log:
+                with open(os.path.join(cwd, "log.json"), "w", encoding="utf-8") as f:
+                    json.dump(memory_log, f, indent=4, ensure_ascii=False)
+            elif os.path.exists(os.path.join(cwd, "log.json.bak")):
+                shutil.copy(os.path.join(cwd, "log.json.bak"), os.path.join(cwd, "log.json"))
+
             # Sicherstellen, dass gitignore existiert und config enthält
             gitignore_path = os.path.join(cwd, ".gitignore")
             ignore_content = ""
@@ -705,15 +733,7 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                     ignore_content = f.read()
             if "config.json" not in ignore_content:
                 with open(gitignore_path, "a") as f:
-                    f.write("\nconfig.json\nlog.json\n")
-            
-            if latest_version:
-                try:
-                    c = load_config()
-                    c["version"] = latest_version
-                    save_config(c)
-                except Exception as ex:
-                    logger.exception(f"Konnte neue Version nicht in config.json schreiben: ")
+                    f.write("\nconfig.json\nlog.json\nsystem.log\n")
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
