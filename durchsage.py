@@ -29,6 +29,63 @@ from fastapi import FastAPI, HTTPException, Header, Depends, status, Form, Body,
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict
+import webbrowser
+
+# =============================================================================
+# 0. SYSTEM TRAY (WINDOWS ONLY)
+# =============================================================================
+tray_icon = None
+
+if platform.system() == "Windows":
+    try:
+        import pystray
+        from PIL import Image, ImageDraw
+
+        def create_tray_image(color):
+            img = Image.new('RGB', (64, 64), color=(0, 0, 0))
+            dc = ImageDraw.Draw(img)
+            dc.ellipse((8, 8, 56, 56), fill=color)
+            return img
+
+        def stop_from_tray(icon, item):
+            logger.info("System Tray: Beenden angefordert.")
+            icon.stop()
+            os._exit(0)
+            
+        def open_web_from_tray(icon, item):
+            try:
+                # Port is normally loaded from config, we'll try to read it later or use a default
+                port = 8122
+                try:
+                    with open("config.json", "r", encoding="utf-8") as f:
+                        c = json.load(f)
+                        if "ui" in c and "port" in c["ui"]:
+                            port = c["ui"]["port"]
+                except: pass
+                webbrowser.open(f"http://localhost:{port}")
+            except Exception as e:
+                logger.error(f"Fehler beim Öffnen des Web-Interfaces: {e}")
+
+        tray_menu = pystray.Menu(
+            pystray.MenuItem('Web-Interface öffnen', open_web_from_tray),
+            pystray.MenuItem('Beenden', stop_from_tray)
+        )
+        
+        tray_icon = pystray.Icon("AlarmDurchsage", create_tray_image("orange"), "Alarm Durchsage (Startet...)", menu=tray_menu)
+        tray_icon.run_detached()
+        
+    except ImportError:
+        logger.warning("pystray oder Pillow fehlt. System Tray Icon wird nicht angezeigt.")
+    except Exception as e:
+        logger.error(f"Fehler beim Starten des System Tray Icons: {e}")
+
+def update_tray_status(color, text):
+    if tray_icon is not None:
+        try:
+            tray_icon.icon = create_tray_image(color)
+            tray_icon.title = f"Alarm Durchsage ({text})"
+        except Exception as e:
+            logger.error(f"Fehler beim Update des Tray Icons: {e}")
 
 # =============================================================================
 # 1. KONFIGURATION & SETUP
@@ -774,6 +831,13 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                 with open(gitignore_path, "a") as f:
                     f.write("\nlog.json\nsystem.log\n")
             
+            # Neue Abhängigkeiten installieren
+            logger.info("Installiere ggf. neue Abhängigkeiten...")
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], cwd=cwd, check=True)
+            except Exception as e:
+                logger.error(f"Fehler beim Installieren der Abhängigkeiten: {e}")
+            
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
             
@@ -1293,15 +1357,18 @@ def start_socket_service():
                     headers={"Cookie": cookie_str}
                 )
                 retry_delay = 5  # Reset bei erfolgreicher Verbindung
+                update_tray_status("green", "Läuft")
                 sio.wait()
             except Exception as e:
                 logger.exception(f"Socket.io Verbindung getrennt oder Fehler: ")
+                update_tray_status("red", "Fehler/Getrennt")
                 if sio.connected:
                     sio.disconnect()
                 retry_delay = min(retry_delay * 2, max_delay)
                 logger.info(f"Warte {retry_delay} Sekunden vor dem nächsten Verbindungsversuch...")
         else:
             connection_error_msg = "Login fehlgeschlagen. Bitte Zugangsdaten für feuerwehreinsatz.info in den Einstellungen prüfen!"
+            update_tray_status("red", "Login fehlgeschlagen")
             if last_disconnect_time is None:
                 last_disconnect_time = time.time()
             retry_delay = min(retry_delay * 2, max_delay)

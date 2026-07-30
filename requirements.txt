@@ -7,3 +7,5 @@ edge-tts
 pydub
 pygame
 python-multipart
+pystray
+Pillow
