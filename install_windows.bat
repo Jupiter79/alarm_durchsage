@@ -84,22 +84,18 @@ del "%SHORTCUT_SCRIPT%"
 
 echo.
 echo =========================================
-echo Installation fast abgeschlossen!
+echo Installation abgeschlossen!
 echo =========================================
-echo WICHTIG: Damit die installierten Programme (wie FFmpeg) richtig
-echo vom System erkannt werden, MUSS der PC einmal neu gestartet werden.
+echo Das System wurde erfolgreich installiert und in den Autostart eingetragen.
 echo.
-echo Nach dem Neustart startet der Service automatisch im Hintergrund.
+echo Der Alarmdurchsage-Server wird nun gestartet...
+wscript "%VBS_SCRIPT%"
 echo.
-set /p RESTART="Moechtest du den PC jetzt neu starten? (J/N): "
-if /i "%RESTART%"=="J" (
-    echo Neustart wird eingeleitet...
-    shutdown /r /t 5
-) else (
-    echo.
-    echo Bitte vergiss nicht, den PC spaeter manuell neu zu starten!
-    echo Um den Service danach manuell zu testen, fuehre folgende Datei aus:
-    echo %VBS_SCRIPT%
-    echo.
-    pause
-)
+echo Der Server läuft nun unsichtbar im Hintergrund. 
+echo Du kannst das Webinterface im Browser aufrufen unter:
+echo http://localhost:8122
+echo.
+echo TIPP: Es wird empfohlen, den PC bei Gelegenheit einmal neu zu starten,
+echo um zu testen, ob der automatische Start (Autostart) korrekt funktioniert.
+echo.
+pause
