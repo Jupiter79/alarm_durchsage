@@ -355,11 +355,15 @@ async function checkSystemStatus() {
                     document.getElementById('ffmpeg-cmd-lin').style.display = 'none';
                     const navItem = document.getElementById('nav-item-internet');
                     if (navItem) navItem.style.display = 'none';
+                    const uninstallContainer = document.getElementById('uninstall-container');
+                    if (uninstallContainer) uninstallContainer.style.display = 'block';
                 } else {
                     document.getElementById('ffmpeg-cmd-win').style.display = 'none';
                     document.getElementById('ffmpeg-cmd-lin').style.display = 'block';
                     const navItem = document.getElementById('nav-item-internet');
                     if (navItem) navItem.style.display = 'block';
+                    const uninstallContainer = document.getElementById('uninstall-container');
+                    if (uninstallContainer) uninstallContainer.style.display = 'none';
                 }
             } else {
                 document.getElementById('ffmpeg-warning').style.display = 'none';

@@ -249,9 +249,6 @@
                             <button type="button" class="btn btn-outline-danger w-100 mb-2" onclick="restartSystem()">
                                 <i class="fa-solid fa-power-off me-2"></i>System Neustarten
                             </button>
-                            <button type="button" class="btn btn-danger w-100" onclick="uninstallSystem()">
-                                <i class="fa-solid fa-trash-can me-2"></i>System Deinstallieren
-                            </button>
                         </div>
                     </div>
 
@@ -270,6 +267,14 @@
                         <!-- Config Editor is injected via JS -->
                         <div id="config-editor-container"></div>
                     </form>
+                    
+                    <div id="uninstall-container" class="mt-5 pt-4 border-top" style="display: none;">
+                        <h4 class="text-danger mb-3">Gefahrenzone</h4>
+                        <p class="text-muted mb-3">Entfernt das Programm aus dem Autostart und löscht den gesamten Installationsordner unwiderruflich. (Python und andere Hilfsprogramme bleiben auf dem PC installiert).</p>
+                        <button type="button" class="btn btn-danger" onclick="uninstallSystem()">
+                            <i class="fa-solid fa-trash-can me-2"></i>System komplett deinstallieren
+                        </button>
+                    </div>
                 </div>
             </div>
 
