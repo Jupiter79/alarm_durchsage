@@ -740,8 +740,8 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                 subprocess.run(["git", "reset", "--hard"], check=True, cwd=cwd)
                 subprocess.run(["git", "checkout", latest_version], check=True, cwd=cwd)
                 
-                # Sicherstellen, dass config nicht getrackt wird, um künftige git reset wipes zu vermeiden
-                subprocess.run(["git", "rm", "--cached", "config.json", "log.json"], cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                # Sicherstellen, dass log nicht getrackt wird
+                subprocess.run(["git", "rm", "--cached", "log.json"], cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             
             # Wiederherstellen aus Memory (100% sicher gegen Datei-Wipe)
             if memory_cfg:
@@ -764,15 +764,15 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             elif os.path.exists(os.path.join(cwd, "log.json.bak")):
                 shutil.copy(os.path.join(cwd, "log.json.bak"), os.path.join(cwd, "log.json"))
 
-            # Sicherstellen, dass gitignore existiert und config enthält
+            # Sicherstellen, dass gitignore existiert und Logs enthält
             gitignore_path = os.path.join(cwd, ".gitignore")
             ignore_content = ""
             if os.path.exists(gitignore_path):
                 with open(gitignore_path, "r") as f:
                     ignore_content = f.read()
-            if "config.json" not in ignore_content:
+            if "log.json" not in ignore_content:
                 with open(gitignore_path, "a") as f:
-                    f.write("\nconfig.json\nlog.json\nsystem.log\n")
+                    f.write("\nlog.json\nsystem.log\n")
             
             logger.info("Update erfolgreich, starte neu...")
             time.sleep(2)
