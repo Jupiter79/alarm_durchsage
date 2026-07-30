@@ -984,12 +984,18 @@ def api_uninstall(session_token: Optional[str] = Cookie(None)):
                 f.write("timeout /t 2 /nobreak >nul\n")
                 f.write(f"taskkill /F /PID {os.getpid()} >nul 2>&1\n")
                 f.write(f"if exist \"{shortcut_path}\" del /f /q \"{shortcut_path}\"\n")
-                f.write(f"timeout /t 1 /nobreak >nul\n")
-                f.write(f"rmdir /s /q \"{install_dir}\"\n")
+                f.write("set count=0\n")
+                f.write(":retry\n")
+                f.write("timeout /t 1 /nobreak >nul\n")
+                f.write(f"rmdir /s /q \"{install_dir}\" >nul 2>&1\n")
+                f.write(f"if exist \"{install_dir}\" (\n")
+                f.write("    set /a count+=1\n")
+                f.write("    if %count% lss 10 goto retry\n")
+                f.write(")\n")
                 f.write(f"del \"%~f0\"\n")
             
             CREATE_NO_WINDOW = getattr(subprocess, 'CREATE_NO_WINDOW', 0x08000000)
-            subprocess.Popen(["cmd.exe", "/c", "start", "/b", '""', bat_path], creationflags=CREATE_NO_WINDOW)
+            subprocess.Popen(["cmd.exe", "/c", "start", "/b", '""', bat_path], creationflags=CREATE_NO_WINDOW, cwd=temp_dir)
             os._exit(0)
             
         else:
