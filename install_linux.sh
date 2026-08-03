@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+KEEP_NETWORK=false
+
+for arg in "$@"; do
+    if [ "$arg" == "--keep-network" ]; then
+        KEEP_NETWORK=true
+    fi
+done
+
 # Log-Datei für die Installation anlegen (schreibt in die Konsole und in die Datei gleichzeitig)
 LOG_FILE="/var/log/alarmdurchsage_install.log"
 exec > >(tee -i "$LOG_FILE") 2>&1
@@ -23,12 +31,14 @@ if ! command -v curl &> /dev/null; then
     PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL curl"
 fi
 
-if ! command -v nmcli &> /dev/null; then
-    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
-fi
+if [ "$KEEP_NETWORK" = false ]; then
+    if ! command -v nmcli &> /dev/null; then
+        PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL network-manager"
+    fi
 
-if ! command -v wpa_supplicant &> /dev/null; then
-    PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL wpasupplicant wireless-tools iw rfkill"
+    if ! command -v wpa_supplicant &> /dev/null; then
+        PACKAGES_TO_INSTALL="$PACKAGES_TO_INSTALL wpasupplicant wireless-tools iw rfkill"
+    fi
 fi
 
 if ! command -v aplay &> /dev/null; then
@@ -43,6 +53,7 @@ else
     echo "Alle Basis-Werkzeuge (git, curl, network-manager) sind bereits installiert!"
 fi
 
+if [ "$KEEP_NETWORK" = false ]; then
 # 1.5 DietPi Netzwerk-Architektur auf "Pure NetworkManager" umbauen
 echo ">>> [1.5/6] Konfiguriere NetworkManager als alleinigen Herrscher..."
 
@@ -118,6 +129,9 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable alarm-network-fix.service
 sudo systemctl start alarm-network-fix.service
+else
+    echo ">>> [1.5 - 1.6/6] Überspringe Netzwerk-Konfiguration (--keep-network aktiv)..."
+fi
 
 # 1.7 DietPi Audio vollautomatisch aktivieren (Pi 3/4 vs Pi 5)
 echo ">>> [1.7/6] Aktiviere Onboard-Audio permanent..."
