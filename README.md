@@ -83,6 +83,7 @@ Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem R
 * **Dauerhafte Verbindung:** Das System ist rund um die Uhr sicher mit dem Server der Leitstelle verbunden und lauscht auf Alarme für die eigene Feuerwehr.
 * **Intelligente Übersetzung:** Sobald ein Alarm eingeht, bereitet das System den rohen Leitstellentext auf. Abkürzungen (z.B. "T VU" oder "BMA") werden in verständliche Sätze (wie "Technischer Einsatz, Verkehrsunfall" oder "Brandmeldeanlage") übersetzt.
 * **Sprachsynthese:** Der übersetzte Text wird in Echtzeit in eine hochwertige Sprachausgabe (TTS) umgewandelt und an die Hausanlage geschickt.
+  > **Hinweis zum Datenschutz (TTS):** Zur Generierung der gesprochenen Texte (TTS) wird das Paket `edge_tts` verwendet. Die reinen Textdaten des Einsatzes werden zur Umwandlung kurzzeitig an Microsoft-Server gesendet (Ziel-URL: `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`).
 
 ---
 
