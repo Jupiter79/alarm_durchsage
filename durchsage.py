@@ -789,6 +789,9 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
             if os.path.exists(os.path.join(cwd, "log.json")):
                 shutil.copy(os.path.join(cwd, "log.json"), os.path.join(cwd, "log.json.bak"))
                 
+            # Auf Linux/Docker kann es zu 'dubious ownership' Fehlern kommen, wenn der Owner abweicht.
+            # Um dies zu beheben, setzen wir safe.directory
+            subprocess.run(["git", "config", "--global", "--add", "safe.directory", cwd], check=False)
             subprocess.run(["git", "fetch", "--tags"], check=True, cwd=cwd)
             
             resp = requests.get("https://api.github.com/repos/Jupiter79/alarm_durchsage/releases/latest", timeout=5)
