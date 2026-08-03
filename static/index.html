@@ -257,10 +257,12 @@
 
             <!-- Config Tab -->
             <div id="tab-config" class="tab-content" style="display:none;">
+                <button class="btn btn-success position-fixed bottom-0 end-0 m-4 shadow-lg" onclick="saveConfigAndRestart()" style="z-index: 1050; border-radius: 50px; padding: 12px 24px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);">
+                    <i class="fa-solid fa-save me-2"></i>Einstellungen speichern & Neustarten
+                </button>
                 <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3>Einstellungen</h3>
-                        <button class="btn btn-success" onclick="saveConfig()">Speichern</button>
                     </div>
 
                     <form id="form-config">

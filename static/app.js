@@ -650,10 +650,25 @@ async function saveConfig() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentConfig)
         });
-        if (res.ok) alert('Konfiguration gespeichert!');
-        else alert('Fehler beim Speichern.');
+        if (res.ok) {
+            // alert('Konfiguration gespeichert!'); // Remove alert if we are going to restart anyway, or keep it? The alert might block the restart. Let's keep it but they have to click ok. Actually, let's keep it.
+            alert('Konfiguration gespeichert!');
+            return true;
+        }
+        else {
+            alert('Fehler beim Speichern.');
+            return false;
+        }
     } catch (e) {
         alert('Netzwerkfehler.');
+        return false;
+    }
+}
+
+async function saveConfigAndRestart() {
+    const success = await saveConfig();
+    if (success) {
+        restartSystem();
     }
 }
 
