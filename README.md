@@ -33,7 +33,9 @@ Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötig
 
 Es gibt 3 verschiedene Wege, das Alarmdurchsage-System zu installieren, je nachdem, welche Hardware du nutzt:
 
-### 1. Fertiges Image (DietPi OS (64bit))
+<details>
+<summary><h3>1. Fertiges Image (DietPi OS (64bit))</h3></summary>
+
 Die absolut einfachste Variante für den Raspberry Pi. Befolge einfach diese simplen Schritte, damit es garantiert klappt:
 
 1. **Pi Imager laden:** Lade dir das offizielle Programm [Raspberry Pi Imager](https://www.raspberrypi.com/software/) herunter und installiere es auf deinem Computer.
@@ -49,7 +51,10 @@ Das System aktiviert und erkennt automatisch alle verfügbaren Audioanschlüsse.
 * **HDMI:** Das Audiosignal wird automatisch auch digital über den HDMI-Port ausgegeben (ideal z. B. beim Pi 5, der keinen eigenen AUX-Port hat).
 * **Externe USB-Soundkarte:** Steckst du eine externe Soundkarte per USB an, wird diese sofort erkannt. Du kannst sie dann ganz bequem direkt auf der Webseite im Menü "Einstellungen (Config)" unter "Output Device" (Ausgabegerät) auswählen und direkt nutzen.
 
-### 2. Manuelle Installation auf Linux / Pi (via Docker)
+</details>
+
+<details>
+<summary><h3>2. Manuelle Installation auf Linux / Pi (via Docker)</h3></summary>
 Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
 1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)
    *(Oder lade es per Terminal herunter: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
@@ -57,12 +62,17 @@ Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, emp
    *(Möchtest du, dass deine bestehende Netzwerkkonfiguration unangetastet bleibt und der NetworkManager nicht installiert wird, ergänze den Flag: `bash install_linux.sh --keep-network`)*
 3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
 
-### 3. Manuelle Installation auf Windows
+</details>
+
+<details>
+<summary><h3>3. Manuelle Installation auf Windows</h3></summary>
 Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
 1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_windows.bat)
    *(Rechtsklick auf die Seite -> "Speichern unter..." wählen, falls sich nur der Text öffnet)*
 2. Mache einen einfachen Doppelklick auf die heruntergeladene Datei `install_windows.bat`.
 3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem kurzen PC-Neustart läuft das System unsichtbar im Hintergrund mit.
+
+</details>
 
 ---
 
