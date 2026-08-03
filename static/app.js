@@ -295,6 +295,8 @@ async function logout() {
 function showView(viewId) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
+    
+
 }
 
 function switchTab(tabId) {
@@ -311,6 +313,8 @@ function switchTab(tabId) {
     if (tabId === 'internet') {
         loadNetworkStatus();
     }
+    
+
 }
 
 function showLoginError(msg) {
@@ -455,12 +459,12 @@ function renderConfigEditor() {
 
     if (!currentConfig) return;
 
-    const createInput = (label, path, value, type = "text", helpText = "", advanced = false) => {
+    const createInput = (label, path, value, type = "text", helpText = "", advanced = false, placeholder = "") => {
         const advancedClass = advanced ? 'advanced-input' : '';
         return `
             <div class="mb-3">
                 <label class="form-label ${advanced ? 'text-muted' : ''}">${label}</label>
-                <input type="${type}" class="form-control ${advancedClass}" data-path="${path}" value="${value}">
+                <input type="${type}" class="form-control ${advancedClass}" data-path="${path}" value="${value}" ${placeholder ? `placeholder="${placeholder}"` : ''}>
                 ${helpText ? `<div class="form-text">${helpText}</div>` : ''}
             </div>
         `;
@@ -543,14 +547,14 @@ function renderConfigEditor() {
         </div>
     `;
 
-    html += createInput('Benutzername', 'credentials.username', currentConfig.credentials.username, 'text', 'Dein Benutzername für den FWEI Zugang.');
+    html += createInput('Benutzername', 'credentials.username', currentConfig.credentials.username, 'text', 'Dein Benutzername für den FWEI Zugang.', false, 'ff12345678');
     html += createInput('Passwort', 'credentials.password', currentConfig.credentials.password, 'password', 'Das dazugehörige Passwort für den FWEI Zugang.');
     html += '<button type="button" class="btn btn-outline-info mt-3 w-100" onclick="testConnection()"><i class="fa-solid fa-rotate me-2"></i>Konfiguration speichern & Neu verbinden & Verbindung Testen</button>';
     html += '</div>';
 
     // Audio
     html += '<div class="config-group"><h5 class="text-primary mb-3">🔊 Audio & Sprachausgabe</h5>';
-    html += createInput('Microsoft TTS Stimme', 'audio.voice', currentConfig.audio.voice, 'text', 'Der Name der Computerstimme. Standardmäßig "de-DE-KillianNeural" (eine sehr deutliche, deutsche männliche Stimme).');
+    html += createInput('Microsoft TTS Stimme', 'audio.voice', currentConfig.audio.voice, 'text', 'Der Name der Computerstimme. Standardmäßig "de-DE-KillianNeural" (eine sehr deutliche, deutsche männliche Stimme). <a href="https://learn.microsoft.com/de-de/azure/ai-services/speech-service/language-support?tabs=tts" target="_blank" class="ms-1 fw-bold text-decoration-none"><i class="fa-solid fa-link me-1"></i>Liste aller Stimmen ansehen</a>');
     html += createInput('Sprech-Geschwindigkeit', 'audio.rate', currentConfig.audio.rate, 'text', 'Wie schnell soll gesprochen werden? Verwende Prozentwerte mit Plus/Minus. Z.B. "-10%" bedeutet 10% langsamer als normal (besser verständlich). "+10%" wäre schneller.');
     html += createInput('Lautstärkeanhebung (dB)', 'audio.gain_db', currentConfig.audio.gain_db, 'number', 'Um wie viel Dezibel (dB) soll die berechnete Sprachausgabe lauter gemacht werden? "9" bedeutet deutlich lauter. Wenn es übersteuert (krächzt), setze den Wert tiefer (z.B. 4).');
     html += createInput('Pause nach Gong (Sekunden)', 'audio.gong_pause_sec', currentConfig.audio.gong_pause_sec, 'number', 'Wie viele Sekunden Stille sollen zwischen dem Ende des Gongs und dem Start der Sprachansage vergehen? (Empfohlen: 1 oder 1.5)');

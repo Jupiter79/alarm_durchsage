@@ -257,12 +257,10 @@
 
             <!-- Config Tab -->
             <div id="tab-config" class="tab-content" style="display:none;">
-                <button class="btn btn-success position-fixed bottom-0 end-0 m-4 shadow-lg" onclick="saveConfigAndRestart()" style="z-index: 1050; border-radius: 50px; padding: 12px 24px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);">
-                    <i class="fa-solid fa-save me-2"></i>Einstellungen speichern & Neustarten
-                </button>
                 <div class="glass-card">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h3>Einstellungen</h3>
+                    <div class="d-flex justify-content-between align-items-center mb-4 sticky-top p-3 rounded shadow-sm" style="top: 15px; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); z-index: 1020; border: 1px solid #e0e0e0; margin-left: -15px; margin-right: -15px;">
+                        <h3 class="mb-0">Einstellungen</h3>
+                        <button class="btn btn-success" onclick="saveConfigAndRestart()"><i class="fa-solid fa-save me-2"></i>Speichern & Neustarten</button>
                     </div>
 
                     <form id="form-config">
@@ -466,7 +464,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=0.0.17"></script>
 </body>
 
 </html>
