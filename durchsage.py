@@ -1144,9 +1144,11 @@ def api_system_status():
         elif last_disconnect_time is not None and (time.time() - last_disconnect_time) > 20:
             crit_error = "Fehler: Keine Verbindung zu feuerwehreinsatz.info möglich (Timeout > 20s)."
             
+    network_disabled = os.environ.get("NETWORK_MANAGEMENT_DISABLED", "false").lower() == "true"
     return {
         "ffmpeg_installed": has_ffmpeg,
         "os": platform.system(),
+        "network_disabled": network_disabled,
         "critical_error": crit_error
     }
 

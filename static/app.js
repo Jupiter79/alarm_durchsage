@@ -345,11 +345,15 @@ async function checkSystemStatus() {
             const uninstallContainer = document.getElementById('uninstall-container');
             
             if (status.os === 'Windows') {
-                if (navItem) navItem.style.display = 'none';
                 if (uninstallContainer) uninstallContainer.style.display = 'block';
             } else {
-                if (navItem) navItem.style.display = 'block';
                 if (uninstallContainer) uninstallContainer.style.display = 'none';
+            }
+            
+            if (status.os === 'Windows' || status.network_disabled) {
+                if (navItem) navItem.style.display = 'none';
+            } else {
+                if (navItem) navItem.style.display = 'block';
             }
 
             if (!status.ffmpeg_installed) {
