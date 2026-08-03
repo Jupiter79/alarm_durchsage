@@ -6,7 +6,7 @@ Willkommen beim Alarmdurchsage-System! Dieses Dokument erklärt in einfachen Wor
 
 ## 👨‍🔧 Instandhaltung & Kontakt
 
-Auszufüllen
+Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**.
 
 ---
 
