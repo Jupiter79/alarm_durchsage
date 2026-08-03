@@ -141,13 +141,8 @@ if [ -f /boot/dietpi/func/dietpi-set_hardware ]; then
     PI_MODEL=$(cat /proc/device-tree/model 2>/dev/null || true)
     echo "Erkanntes Mainboard-Modell: $PI_MODEL"
     
-    if [[ "$PI_MODEL" == *"Raspberry Pi 5"* ]]; then
-        echo "Dieses Modell hat keinen Aux-Anschluss. Aktiviere HDMI-Audio als Standard..."
-        sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-hdmi || true
-    else
-        echo "Aktiviere nativen 3.5mm Aux-Anschluss als Standard..."
-        sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-3.5mm || true
-    fi
+    echo "Aktiviere automatische Audio-Erkennung (HDMI / 3.5mm) für alle Modelle..."
+    sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-auto || true
 fi
 
 # Fallback für Standard-Betriebssystem

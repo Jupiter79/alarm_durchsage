@@ -43,6 +43,12 @@ Die absolut einfachste Variante für den Raspberry Pi. Befolge einfach diese sim
 5. **Einschalten & Warten:** Schließe den Strom an. Der Raspberry Pi installiert nun alles komplett vollautomatisch im Hintergrund. Je nach deiner Internetverbindung dauert das ca. **20 bis 30 Minuten**. Bitte lass den Pi in dieser Zeit einfach in Ruhe arbeiten und trenne nicht den Strom.
 6. **Fertig:** Danach ist dein System einsatzbereit! Du kannst nun von jedem anderen Gerät (z.B. deinem Handy oder einem anderen PC, das sich im gleichen Netzwerk befindet) über deinen normalen Webbrowser auf das Web-GUI zugreifen. Die Adresse lautet meistens `http://alarmdurchsage.local:8122` (oder du nutzt die IP-Adresse des Pis, die du in deinem Router findest).
 
+**🔊 Wichtiger Hinweis zur Audioausgabe:** 
+Das System aktiviert und erkennt automatisch alle verfügbaren Audioanschlüsse. Du hast dabei völlige Freiheit, wie du den Ton an die Hausanlage überträgst:
+* **Klassisch (AUX/Kopfhöreranschluss):** Bei den meisten Modellen (wie Pi 3 & 4) einfach das AUX-Kabel einstecken.
+* **HDMI:** Das Audiosignal wird automatisch auch digital über den HDMI-Port ausgegeben (ideal z. B. beim Pi 5, der keinen eigenen AUX-Port hat).
+* **Externe USB-Soundkarte:** Steckst du eine externe Soundkarte per USB an, wird diese sofort erkannt. Du kannst sie dann ganz bequem direkt auf der Webseite im Menü "Einstellungen (Config)" unter "Output Device" (Ausgabegerät) auswählen und direkt nutzen.
+
 ### 2. Manuelle Installation auf Linux / Pi (via Docker)
 Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
 1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)
