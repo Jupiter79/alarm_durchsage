@@ -200,6 +200,7 @@ cd "$INSTALL_DIR"
 echo ">>> [4/6] Bereite Konfiguration und Logs vor..."
 rm -rf system.log log.json 2>/dev/null || true
 touch system.log log.json
+echo "NETWORK_MANAGEMENT_DISABLED=$KEEP_NETWORK" > .env
 
 # 5. Docker Container bauen und starten
 echo ">>> [5/6] Baue und starte den Container (Linux-Profil mit Audio)..."

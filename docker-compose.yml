@@ -26,6 +26,7 @@ services:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
       - XDG_RUNTIME_DIR=/tmp/runtime-root
       - SDL_AUDIODRIVER=alsa
+      - NETWORK_MANAGEMENT_DISABLED=${NETWORK_MANAGEMENT_DISABLED:-false}
     volumes:
       - "/dev/snd:/dev/snd"
       - ./:/app

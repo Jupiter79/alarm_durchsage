@@ -1256,6 +1256,9 @@ def api_get_gong_audio(gong_id: int):
 def api_get_network_status():
     system = platform.system()
     
+    if os.environ.get("NETWORK_MANAGEMENT_DISABLED", "false").lower() == "true":
+        return {"mode": "disabled", "os": system}
+        
     if system == "Windows":
         return {"mode": "disabled", "os": "Windows"}
 
