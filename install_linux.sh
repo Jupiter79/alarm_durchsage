@@ -133,7 +133,7 @@ else
     echo ">>> [1.5 - 1.6/6] Überspringe Netzwerk-Konfiguration (--keep-network aktiv)..."
 fi
 
-# 1.7 DietPi Audio vollautomatisch aktivieren (Pi 3/4 vs Pi 5)
+# 1.7 DietPi Audio vollautomatisch aktivieren
 echo ">>> [1.7/6] Aktiviere Onboard-Audio permanent..."
 
 if [ -f /boot/dietpi/func/dietpi-set_hardware ]; then
@@ -142,7 +142,7 @@ if [ -f /boot/dietpi/func/dietpi-set_hardware ]; then
     echo "Erkanntes Mainboard-Modell: $PI_MODEL"
     
     if [[ "$PI_MODEL" == *"Raspberry Pi 5"* ]]; then
-        echo "Raspberry Pi 5 hat keinen Aux-Anschluss. Aktiviere HDMI-Audio als Standard..."
+        echo "Dieses Modell hat keinen Aux-Anschluss. Aktiviere HDMI-Audio als Standard..."
         sudo /boot/dietpi/func/dietpi-set_hardware soundcard rpi-bcm2835-hdmi || true
     else
         echo "Aktiviere nativen 3.5mm Aux-Anschluss als Standard..."
@@ -150,7 +150,7 @@ if [ -f /boot/dietpi/func/dietpi-set_hardware ]; then
     fi
 fi
 
-# Fallback für Standard-Raspberry Pi OS
+# Fallback für Standard-Betriebssystem
 for CONFIG_FILE in /boot/config.txt /boot/firmware/config.txt; do
     if [ -f "$CONFIG_FILE" ]; then
         if ! grep -q "^dtparam=audio=on" "$CONFIG_FILE"; then
@@ -207,7 +207,7 @@ rm -rf system.log log.json 2>/dev/null || true
 touch system.log log.json
 
 # 5. Docker Container bauen und starten
-echo ">>> [5/6] Baue und starte den Container (Pi-Profil mit Audio)..."
+echo ">>> [5/6] Baue und starte den Container (Linux-Profil mit Audio)..."
 # Wir nutzen sudo docker, da die usermod-Änderung aus Schritt 2 ohne Abmelden noch nicht greift
 sudo docker compose --profile pi up -d --build
 
@@ -224,6 +224,6 @@ echo ""
 echo " WICHTIG: Das System muss neugestartet werden, damit Audio"
 echo " und WLAN-Chips auf Hardware-Ebene freigeschaltet werden."
 echo "====================================================="
-echo " Der Raspberry Pi startet in 10 Sekunden automatisch neu..."
+echo " Das System startet in 10 Sekunden automatisch neu..."
 sleep 10
 sudo reboot
