@@ -790,19 +790,25 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
                 shutil.copy(os.path.join(cwd, "log.json"), os.path.join(cwd, "log.json.bak"))
                 
             # Auf Linux/Docker kann es zu 'dubious ownership' Fehlern kommen, wenn der Owner abweicht.
-            # Um dies zu beheben, setzen wir safe.directory
-            subprocess.run(["git", "config", "--global", "--add", "safe.directory", cwd], check=False)
-            subprocess.run(["git", "fetch", "--tags"], check=True, cwd=cwd)
+            # Um dies zuverlässig für diesen Aufruf zu beheben, nutzen wir -c safe.directory=*
+            def run_git(args, **kwargs):
+                try:
+                    subprocess.run(["git", "-c", "safe.directory=*"] + args, check=True, cwd=cwd, capture_output=True, text=True, **kwargs)
+                except subprocess.CalledProcessError as e:
+                    logger.error(f"Git Kommando fehlgeschlagen: {e.cmd}\nStderr: {e.stderr}")
+                    raise
+
+            run_git(["fetch", "--tags", "--force"])
             
             resp = requests.get("https://api.github.com/repos/Jupiter79/alarm_durchsage/releases/latest", timeout=5)
             latest_version = resp.json().get("tag_name")
             
             if latest_version:
-                subprocess.run(["git", "reset", "--hard"], check=True, cwd=cwd)
-                subprocess.run(["git", "checkout", latest_version], check=True, cwd=cwd)
+                run_git(["reset", "--hard"])
+                run_git(["checkout", latest_version])
                 
                 # Sicherstellen, dass log nicht getrackt wird
-                subprocess.run(["git", "rm", "--cached", "log.json"], cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["git", "-c", "safe.directory=*", "rm", "--cached", "log.json"], cwd=cwd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             
             # Wiederherstellen aus Memory (100% sicher gegen Datei-Wipe)
             if memory_cfg:
