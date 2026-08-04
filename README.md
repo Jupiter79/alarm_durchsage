@@ -2,6 +2,9 @@
 
 Willkommen beim Alarmdurchsage-System! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
 
+<img width="1583" height="959" alt="image" src="https://github.com/user-attachments/assets/93bd993d-c8da-4334-afe2-d2af8156b4ec" />
+
+
 ---
 
 ## 👨‍🔧 Instandhaltung & Kontakt
