@@ -62,7 +62,7 @@ Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, emp
 1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)  
    *(Oder lade es per Terminal herunter: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
 2. Führe das Skript im Terminal aus: `bash install_linux.sh`  
-   *(Möchtest du, dass deine bestehende Netzwerkkonfiguration unangetastet bleibt und der NetworkManager nicht installiert wird, ergänze den Flag: `bash install_linux.sh --keep-network`)*
+   *(Möchtest du, dass das System sich zusätzlich automatisch um das WLAN kümmert und den NetworkManager installiert, ergänze den Flag: `bash install_linux.sh --install-networkmanager`)*
 3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
 
 ### 3. Manuelle Installation auf Windows

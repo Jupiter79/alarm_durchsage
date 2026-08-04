@@ -7,4 +7,4 @@ https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/refs/heads/main/inst
 
 chmod +x /tmp/install_linux.sh
 
-bash /tmp/install_linux.sh
+bash /tmp/install_linux.sh --install-networkmanager

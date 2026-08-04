@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-KEEP_NETWORK=false
+KEEP_NETWORK=true
 
 for arg in "$@"; do
-    if [ "$arg" == "--keep-network" ]; then
-        KEEP_NETWORK=true
+    if [ "$arg" == "--install-networkmanager" ]; then
+        KEEP_NETWORK=false
     fi
 done
 
@@ -130,7 +130,7 @@ sudo systemctl daemon-reload
 sudo systemctl enable alarm-network-fix.service
 sudo systemctl start alarm-network-fix.service
 else
-    echo ">>> [1.5 - 1.6/6] Überspringe Netzwerk-Konfiguration (--keep-network aktiv)..."
+    echo ">>> [1.5 - 1.6/6] Überspringe Netzwerk-Konfiguration (NetworkManager wird nicht installiert)..."
 fi
 
 # 1.7 DietPi Audio vollautomatisch aktivieren
