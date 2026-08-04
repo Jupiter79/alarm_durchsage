@@ -71,8 +71,8 @@ Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, emp
 <details>
 <summary><h3>3. Manuelle Installation auf Windows</h3></summary>
 Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
-1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_windows.bat)
-   *(Rechtsklick auf die Seite -> "Speichern unter..." wählen, falls sich nur der Text öffnet)*
+1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://github.com/Jupiter79/alarm_durchsage/blob/main/install_windows.bat)
+   *(Dort auf den Download Button klicken)*
 2. Mache einen einfachen Doppelklick auf die heruntergeladene Datei `install_windows.bat`.
 3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem kurzen PC-Neustart läuft das System unsichtbar im Hintergrund mit.
 
