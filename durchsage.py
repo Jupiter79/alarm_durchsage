@@ -172,7 +172,7 @@ if platform.system() == "Windows":
             pystray.MenuItem('Beenden', stop_from_tray)
         )
         
-        tray_icon = pystray.Icon("AlarmDurchsage", create_tray_image("orange"), "Alarm Durchsage (Startet...)", menu=tray_menu)
+        tray_icon = pystray.Icon("AlarmDurchsageServer", create_tray_image("orange"), "Alarm Durchsage Server (Startet...)", menu=tray_menu)
         tray_icon.run_detached()
         
     except ImportError:
@@ -184,7 +184,7 @@ def update_tray_status(color, text):
     if tray_icon is not None:
         try:
             tray_icon.icon = create_tray_image(color)
-            tray_icon.title = f"Alarm Durchsage ({text})"
+            tray_icon.title = f"Alarm Durchsage Server ({text})"
         except Exception as e:
             logger.error(f"Fehler beim Update des Tray Icons: {e}")
 
@@ -1084,7 +1084,7 @@ def api_uninstall(session_token: Optional[str] = Cookie(None)):
             bat_path = os.path.join(temp_dir, "alarm_durchsage_uninstall.bat")
             
             appdata = os.environ.get('APPDATA', '')
-            shortcut_path = os.path.join(appdata, "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "AlarmDurchsage.lnk")
+            shortcut_path = os.path.join(appdata, "Microsoft", "Windows", "Start Menu", "Programs", "Startup", "AlarmDurchsageServer.lnk")
             
             with open(bat_path, "w", encoding="utf-8") as f:
                 f.write("@echo off\n")

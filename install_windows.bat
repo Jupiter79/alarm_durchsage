@@ -3,12 +3,12 @@ setlocal enabledelayedexpansion
 
 set "LOGFILE=%~dp0install.log"
 echo ========================================= > "%LOGFILE%"
-echo  Alarm Durchsage - Installationslog >> "%LOGFILE%"
+echo  Alarm Durchsage Server - Installationslog >> "%LOGFILE%"
 echo  Datum: %date% %time% >> "%LOGFILE%"
 echo ========================================= >> "%LOGFILE%"
 
 echo =========================================
-echo  Alarm Durchsage - Windows Installation
+echo  Alarm Durchsage Server - Windows Installation
 echo =========================================
 echo.
 echo Installationsprotokoll wird gespeichert unter:
@@ -91,11 +91,11 @@ echo VBScript erstellt unter: %VBS_SCRIPT% >> "%LOGFILE%"
 set "SHORTCUT_SCRIPT=%INSTALL_DIR%\create_shortcut.ps1"
 (
 echo $WshShell = New-Object -comObject WScript.Shell
-echo $Shortcut = $WshShell.CreateShortcut("%AUTOSTART_DIR%\AlarmDurchsage.lnk"^)
+echo $Shortcut = $WshShell.CreateShortcut("%AUTOSTART_DIR%\AlarmDurchsageServer.lnk"^)
 echo $Shortcut.TargetPath = "wscript.exe"
 echo $Shortcut.Arguments = """%VBS_SCRIPT%"""
 echo $Shortcut.WorkingDirectory = "%INSTALL_DIR%"
-echo $Shortcut.Description = "Alarm Durchsage Autostart"
+echo $Shortcut.Description = "Alarm Durchsage Server Autostart"
 echo $Shortcut.Save^(^)
 ) > "%SHORTCUT_SCRIPT%"
 
