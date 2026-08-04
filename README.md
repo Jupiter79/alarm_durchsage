@@ -1,9 +1,8 @@
-# 🚒 Feuerwehr Alarmdurchsage-System
+# 🚒 Feuerwehr Alarm Durchsage Server
 
-Willkommen beim Alarmdurchsage-System! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
+Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
 
-<img width="1583" height="959" alt="image" src="https://github.com/user-attachments/assets/93bd993d-c8da-4334-afe2-d2af8156b4ec" />
-
+![Screenshot Web-Interface](https://github.com/user-attachments/assets/93bd993d-c8da-4334-afe2-d2af8156b4ec)
 
 ---
 
@@ -27,18 +26,19 @@ Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ
 ## 🔌 Voraussetzungen & Hardware
 
 Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötigt:
+
 * **Hardware & Betriebssystem:** Ein kleiner Rechner, am besten ein **Raspberry Pi (Linux/Raspberry Pi OS)** oder ein handelsüblicher **Mini-PC mit Windows**. Das gesamte System ist zu 100% plattformunabhängig und läuft nativ auf Linux und Windows.
 * **Audio-Verbindung:** Ein Adapterkabel (meist **AUX auf Cinch**), um den Audioausgang (Kopfhöreranschluss) des Raspberry Pi/PCs direkt mit dem Verstärker bzw. der Lautsprecheranlage des Feuerwehrhauses zu verbinden. *(Alternativ: Falls das Feuerwehrhaus über keine fest verbaute Anlage verfügt, kann auch einfach ein ganz normaler PC-Lautsprecher angeschlossen und z.B. in der Umkleide platziert werden).*
 * **Netzwerk (LAN & WLAN):** Das System unterstützt vollumfänglich sowohl **LAN (Kabel)** als auch **WLAN (Drahtlos)** für Windows und Linux. Direkt auf der Webseite findest du einen eigenen Tab "Internet", in dem du ganz bequem WLAN-Netzwerke in deiner Umgebung suchen, dich mit einem Passwort verbinden oder jederzeit zurück auf LAN wechseln kannst. Für eine ausfallsichere Verbindung im Feuerwehrhaus wird dennoch ein festes LAN-Kabel empfohlen.
 * **FWEI Zugang:** Um die Einsatzdaten der Leitstelle empfangen zu können, wird zwingend ein **Mannschafts- oder Kommando-Login** von der FWEI (FeuerwehrEinsatzInfo) benötigt.
+
 ---
 
 ## 🚀 Installation
 
-Es gibt 3 verschiedene Wege, das Alarmdurchsage-System zu installieren, je nachdem, welche Hardware du nutzt:
+Es gibt 3 verschiedene Wege, den Alarm Durchsage Server zu installieren, je nachdem, welche Hardware du nutzt:
 
-<details>
-<summary><h3>1. Fertiges Image (DietPi OS (64bit))</h3></summary>
+### 1. Fertiges Image (DietPi OS - 64bit)
 
 Die absolut einfachste Variante für den Raspberry Pi. Befolge einfach diese simplen Schritte, damit es garantiert klappt:
 
@@ -55,28 +55,24 @@ Das System aktiviert und erkennt automatisch alle verfügbaren Audioanschlüsse.
 * **HDMI:** Das Audiosignal wird automatisch auch digital über den HDMI-Port ausgegeben (ideal z. B. beim Pi 5, der keinen eigenen AUX-Port hat).
 * **Externe USB-Soundkarte:** Steckst du eine externe Soundkarte per USB an, wird diese sofort erkannt. Du kannst sie dann ganz bequem direkt auf der Webseite im Menü "Einstellungen (Config)" unter "Output Device" (Ausgabegerät) auswählen und direkt nutzen.
 
-</details>
+### 2. Manuelle Installation auf Linux / Pi (via Docker)
 
-<details>
-<summary><h3>2. Manuelle Installation auf Linux / Pi (via Docker)</h3></summary>
 Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
-1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)
+
+1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)  
    *(Oder lade es per Terminal herunter: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
-2. Führe das Skript im Terminal aus: `bash install_linux.sh`
+2. Führe das Skript im Terminal aus: `bash install_linux.sh`  
    *(Möchtest du, dass deine bestehende Netzwerkkonfiguration unangetastet bleibt und der NetworkManager nicht installiert wird, ergänze den Flag: `bash install_linux.sh --keep-network`)*
 3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
 
-</details>
+### 3. Manuelle Installation auf Windows
 
-<details>
-<summary><h3>3. Manuelle Installation auf Windows</h3></summary>
 Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
-1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://github.com/Jupiter79/alarm_durchsage/blob/main/install_windows.bat)
+
+1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://github.com/Jupiter79/alarm_durchsage/blob/main/install_windows.bat)  
    *(Dort auf den Download Button klicken)*
 2. Mache einen einfachen Doppelklick auf die heruntergeladene Datei `install_windows.bat`.
-3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem kurzen PC-Neustart läuft das System unsichtbar im Hintergrund mit.
-
-</details>
+3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem PC-Neustart läuft das System unsichtbar im Hintergrund mit.
 
 ---
 
@@ -87,7 +83,8 @@ Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem R
 * **Dauerhafte Verbindung:** Das System ist rund um die Uhr sicher mit dem Server der Leitstelle verbunden und lauscht auf Alarme für die eigene Feuerwehr.
 * **Intelligente Übersetzung:** Sobald ein Alarm eingeht, bereitet das System den rohen Leitstellentext auf. Abkürzungen (z.B. "T VU" oder "BMA") werden in verständliche Sätze (wie "Technischer Einsatz, Verkehrsunfall" oder "Brandmeldeanlage") übersetzt.
 * **Sprachsynthese:** Der übersetzte Text wird in Echtzeit in eine hochwertige Sprachausgabe (TTS) umgewandelt und an die Hausanlage geschickt.
-  > **Hinweis zum Datenschutz (TTS):** Zur Generierung der gesprochenen Texte (TTS) wird das Paket `edge_tts` verwendet. Die reinen Textdaten des Einsatzes werden zur Umwandlung kurzzeitig an Microsoft-Server gesendet (Ziel-URL: `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`).
+
+> **Hinweis zum Datenschutz (TTS):** Zur Generierung der gesprochenen Texte (TTS) wird das Paket `edge_tts` verwendet. Die reinen Textdaten des Einsatzes werden zur Umwandlung kurzzeitig an Microsoft-Server gesendet (Ziel-URL: `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`).
 
 ---
 
@@ -96,15 +93,17 @@ Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem R
 Das System verfügt über eine grafische Oberfläche (Webseite). Du musst absolut kein Computer-Experte sein, um das System zu bedienen oder Einstellungen zu ändern.
 
 ### 🌐 So greifst du auf das System zu:
+
 1. Öffne auf einem beliebigen Gerät (PC, Tablet oder Smartphone), das mit dem **Feuerwehr-Netzwerk (WLAN/LAN)** verbunden ist, einen Internetbrowser (z.B. Chrome, Safari, Edge).
-2. Gib oben in die Adresszeile folgende Adresse ein:
-   👉 **http://alarmdurchsage.local:8122**
+2. Gib oben in die Adresszeile folgende Adresse ein:  
+   **http://alarmdurchsage.local:8122**  
    *(Sollte das nicht klappen, kann alternativ die direkte IP-Adresse des Geräts im Netzwerk eingegeben werden).*
-3. Du landest auf der Anmeldeseite. Das Passwort lautet standardmäßig:
-   👉 **`122`**
+3. Du landest auf der Anmeldeseite. Das Passwort lautet standardmäßig:  
+   **`122`**  
    *(Das System speichert die Anmeldung, sodass du dich nach einem Neustart nicht immer wieder neu einloggen musst).*
 
 ### 🛠️ Was kannst du auf der Webseite machen?
+
 Sobald du eingeloggt bist, hast du Zugriff auf folgende Funktionen:
 
 * **Manuelle Durchsagen (Info-Gong):** Du kannst jederzeit eigene Texte eintippen und sie manuell im Feuerwehrhaus vorlesen lassen.
