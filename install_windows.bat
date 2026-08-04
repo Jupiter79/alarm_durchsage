@@ -65,7 +65,7 @@ if %ERRORLEVEL% EQU 0 (
 echo Verwende Python-Befehl: %PYTHON_CMD% >> "%LOGFILE%"
 
 %PYTHON_CMD% -m pip install --upgrade pip >> "%LOGFILE%" 2>&1
-%PYTHON_CMD% -m pip install fastapi pydantic uvicorn pydub pygame edge-tts requests python-socketio python-multipart static-ffmpeg >> "%LOGFILE%" 2>&1
+%PYTHON_CMD% -m pip install -r requirements.txt static-ffmpeg >> "%LOGFILE%" 2>&1
 
 :: 3b. FFmpeg lokal einrichten (100% verlaesslich, ohne PATH-Probleme)
 echo.
