@@ -21,6 +21,8 @@ Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ
 2. **Information:** Es liest mit einer klaren, natürlichen Computerstimme die **Einsatzdaten** vor (z. B. Einsatzart, Adresse, Zusatzinformationen).
 3. **Wiederholung:** Die Durchsage wird nach vorgegebenen Zeiten automatisch wiederholt (z.B. nach 1,5 und 3 Minuten). Das ist extrem hilfreich für alle Kameradinnen und Kameraden, die nicht sofort bei der Alarmierung im Rüsthaus sind, sondern erst nach und nach einrücken.
 
+Hinweis: Bei selbst angelegten Einsätzen (über Kommando-Login) erfolgt keine Durchsage.
+
 ---
 
 ## 👥 Bedienung: Admin- und User-Ansicht
