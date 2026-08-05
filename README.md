@@ -23,6 +23,21 @@ Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ
 
 ---
 
+## 👥 Bedienung: Admin- und User-Ansicht
+
+Das Web-Interface bietet zwei verschiedene Ansichten, um das System im Feuerwehrhaus optimal und sicher nutzen zu können:
+
+### 🔴 Admin-Ansicht
+In der Admin-Ansicht (Zugang über das Passwort) hast du die volle Kontrolle über das gesamte System. Hier kannst du alle Konfigurationen vornehmen, Gongs hochladen oder löschen, WLAN-Netzwerke verwalten, Logs einsehen und Systemupdates durchführen.
+
+### 🔵 User-Ansicht (Eingeschränkter Modus)
+Die User-Ansicht ist speziell für den alltäglichen Gebrauch gedacht – idealerweise auf einem PC direkt neben der Funkfixstation oder der Florianstation deiner Feuerwehr.
+Über einen speziellen Direkt-Link (den der Admin im Konfigurations-Tab generieren und kopieren kann) gelangt man sofort in diesen eingeschränkten Modus, ganz ohne Passwort-Eingabe.
+In dieser Ansicht können Benutzer lediglich manuell Durchsagen triggern, die Einsatzhistorie einsehen und Gongs abspielen. Sämtliche kritischen Einstellungen (System, Konfiguration, Löschen von Gongs) sind komplett ausgeblendet und serverseitig gesperrt.
+**Tipp:** Speichere diesen Direkt-Link auf dem PC in der Florianstation einfach als Desktop-Verknüpfung (Shortcut). So können die Kameradinnen und Kameraden das Interface mit nur einem Klick öffnen und Durchsagen machen, ohne etwas verstellen zu können!
+
+---
+
 ## 🔌 Voraussetzungen & Hardware
 
 Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötigt:
