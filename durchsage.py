@@ -1178,11 +1178,13 @@ def api_system_status():
             crit_error = "Fehler: Keine Verbindung zu feuerwehreinsatz.info möglich (Timeout > 20s)."
             
     network_disabled = os.environ.get("NETWORK_MANAGEMENT_DISABLED", "false").lower() == "true"
+    cfg_live = load_config()
     return {
         "ffmpeg_installed": has_ffmpeg,
         "os": platform.system(),
         "network_disabled": network_disabled,
-        "critical_error": crit_error
+        "critical_error": crit_error,
+        "alarm_mode": cfg_live.get("ui", {}).get("alarm_mode", "full")
     }
 
 

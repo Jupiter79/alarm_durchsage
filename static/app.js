@@ -282,10 +282,46 @@ async function checkAuth() {
     showView('view-login');
 }
 
-function handleLoginSuccess(passwordChanged) {
-    if (!passwordChanged) {
+window.currentRole = 'admin';
+
+function handleLoginSuccess(passwordChanged, role) {
+    window.currentRole = role;
+    if (!passwordChanged && role === 'admin') {
         showView('view-change-password');
     } else {
+        if (role === 'user') {
+            const configTab = document.getElementById('nav-item-config');
+            if (configTab) configTab.style.display = 'none';
+            const internetTab = document.getElementById('nav-item-internet');
+            if (internetTab) internetTab.style.display = 'none';
+            const wartungBox = document.getElementById('system-wartung-box');
+            if (wartungBox) wartungBox.style.display = 'none';
+            const gongAdmin = document.getElementById('gong-admin-section');
+            if (gongAdmin) gongAdmin.style.display = 'none';
+            const gongsTab = document.getElementById('nav-item-gongs');
+            if (gongsTab) gongsTab.style.display = 'block';
+            
+            const roleBadge = document.getElementById('role-badge');
+            if (roleBadge) {
+                roleBadge.className = 'badge bg-primary me-2';
+                roleBadge.textContent = 'User-View';
+            }
+        } else {
+            const configTab = document.getElementById('nav-item-config');
+            if (configTab) configTab.style.display = 'block';
+            const gongsTab = document.getElementById('nav-item-gongs');
+            if (gongsTab) gongsTab.style.display = 'block';
+            const wartungBox = document.getElementById('system-wartung-box');
+            if (wartungBox) wartungBox.style.display = 'block';
+            const gongAdmin = document.getElementById('gong-admin-section');
+            if (gongAdmin) gongAdmin.style.display = 'block';
+            
+            const roleBadge = document.getElementById('role-badge');
+            if (roleBadge) {
+                roleBadge.className = 'badge bg-danger me-2';
+                roleBadge.textContent = 'Admin-View';
+            }
+        }
         showView('view-app');
         initApp();
     }
@@ -351,6 +387,11 @@ async function checkSystemStatus() {
                 if (ce) ce.style.display = 'none';
             }
 
+            if (status.alarm_mode) {
+                const radio = document.querySelector(`input[name="alarm_mode"][value="${status.alarm_mode}"]`);
+                if (radio) radio.checked = true;
+            }
+
             // OS Dependent UI
             const navItem = document.getElementById('nav-item-internet');
             const uninstallContainer = document.getElementById('uninstall-container');
@@ -405,11 +446,22 @@ async function initApp() {
     await checkSystemStatus();
     setInterval(checkSystemStatus, 5000);
 
-    // Load config to set alarm mode initially
-    await loadConfig();
-    
-    // Check for updates
-    checkUpdate();
+    if (window.currentRole === 'admin') {
+        // Load config to set alarm mode initially
+        await loadConfig();
+        
+        // Check for updates
+        checkUpdate();
+    } else {
+        // User Mode: Fetch only gongs to populate dropdown
+        try {
+            const res = await fetch('/api/gongs');
+            if (res.ok) {
+                currentConfig = { gongs: await res.json() };
+                populateGongsSelect();
+            }
+        } catch(e) {}
+    }
 }
 
 async function clearQueue() {
@@ -451,11 +503,6 @@ async function loadConfig() {
 
             renderConfigEditor();
             populateGongsSelect();
-
-            // Set alarm_mode radio button
-            const mode = currentConfig.ui?.alarm_mode || 'full';
-            const radio = document.querySelector(`input[name="alarm_mode"][value="${mode}"]`);
-            if (radio) radio.checked = true;
         }
     } catch (e) { }
 }
@@ -805,16 +852,21 @@ async function loadGongs() {
             tbody.innerHTML = '';
             gongs.forEach(g => {
                 const isAlarmText = g.is_alarm ? '<span class="badge bg-danger">Alarm</span>' : '<span class="badge bg-secondary">Durchsage</span>';
-                let deleteBtn = `<button class="btn btn-sm btn-outline-danger" onclick="deleteGong(${g.id})" title="Löschen"><i class="fa-solid fa-trash"></i></button>`;
-                if (g.id === 1 || g.id === 2) {
-                    deleteBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Standard-Gong (geschützt)"><i class="fa-solid fa-lock"></i></button>`;
-                }
+                
+                let adminActions = '';
+                if (window.currentRole === 'admin') {
+                    let deleteBtn = `<button class="btn btn-sm btn-outline-danger" onclick="deleteGong(${g.id})" title="Löschen"><i class="fa-solid fa-trash"></i></button>`;
+                    if (g.id === 1 || g.id === 2) {
+                        deleteBtn = `<button class="btn btn-sm btn-outline-secondary" disabled title="Standard-Gong (geschützt)"><i class="fa-solid fa-lock"></i></button>`;
+                    }
 
-                let replaceInput = `<input type="file" id="replace-file-${g.id}" style="display:none" accept=".mp3" onchange="replaceGong(${g.id}, this)">
-                                    <button class="btn btn-sm btn-outline-warning" onclick="document.getElementById('replace-file-${g.id}').click()" title="Gong ersetzen"><i class="fa-solid fa-upload"></i></button>`;
-                let resetBtn = '';
-                if (g.id === 1 || g.id === 2) {
-                    resetBtn = `<button class="btn btn-sm btn-outline-info" onclick="resetGong(${g.id})" title="Auf Standard zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>`;
+                    let replaceInput = `<input type="file" id="replace-file-${g.id}" style="display:none" accept=".mp3" onchange="replaceGong(${g.id}, this)">
+                                        <button class="btn btn-sm btn-outline-warning" onclick="document.getElementById('replace-file-${g.id}').click()" title="Gong ersetzen"><i class="fa-solid fa-upload"></i></button>`;
+                    let resetBtn = '';
+                    if (g.id === 1 || g.id === 2) {
+                        resetBtn = `<button class="btn btn-sm btn-outline-info" onclick="resetGong(${g.id})" title="Auf Standard zurücksetzen"><i class="fa-solid fa-rotate-left"></i></button>`;
+                    }
+                    adminActions = replaceInput + ' ' + resetBtn + ' ' + deleteBtn;
                 }
 
                 tbody.innerHTML += `
@@ -824,9 +876,7 @@ async function loadGongs() {
                         <td>${isAlarmText}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-primary" onclick="previewGongId(${g.id})" title="Vorhören"><i class="fa-solid fa-play"></i></button>
-                            ${replaceInput}
-                            ${resetBtn}
-                            ${deleteBtn}
+                            ${adminActions}
                         </td>
                     </tr>
                 `;
