@@ -993,7 +993,7 @@ async function uninstallSystem() {
     if (confirm("⚠️ ACHTUNG: Willst du die Alarmdurchsage wirklich komplett DEINSTALLIEREN?\n\nAlle Dateien, Konfigurationen und Einstellungen werden unwiderruflich gelöscht. Bei Docker-Installationen wird der gesamte Container zerstört.")) {
         if (confirm("⚠️ LETZTE WARNUNG: Bist du absolut sicher? Dies kann NICHT rückgängig gemacht werden!")) {
             try {
-                const res = await fetch('/api/uninstall', { method: 'POST' });
+                const res = await fetch('/api/uninstall', { method: 'DELETE' });
                 if (res.ok) {
                     alert("Deinstallation erfolgreich gestartet. Das System zerstört sich nun selbst und wird beendet. Auf Wiedersehen!");
                     document.body.innerHTML = "<h1 style='text-align:center; margin-top:20vh; color:#dc3545;'>System wurde deinstalliert.</h1><p style='text-align:center;'>Du kannst dieses Fenster nun schließen.</p>";
