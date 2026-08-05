@@ -8,7 +8,7 @@ Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in einfachen Wo
 
 ## 👨‍🔧 Instandhaltung & Kontakt
 
-Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**.
+Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**. Alternativ können neue Features oder Probleme jederzeit mittels eines Issues auf der GitHub-Seite eröffnet werden.
 
 ---
 
