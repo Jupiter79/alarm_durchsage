@@ -1,6 +1,15 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: --- Administratorrechte anfordern ---
+net session >nul 2>&1
+if %errorLevel% NEQ 0 (
+    echo Fordere Administratorrechte an... Bitte Bestaetigen.
+    powershell -Command "Start-Process -FilePath '%~f0' -Verb RunAs"
+    exit /b
+)
+:: -------------------------------------
+
 set "LOGFILE=%~dp0install.log"
 echo ========================================= > "%LOGFILE%"
 echo  Alarm Durchsage Server - Installationslog >> "%LOGFILE%"
