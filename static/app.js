@@ -2,6 +2,13 @@ let currentConfig = null;
 
 // --- Initialization & Auth ---
 document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const hash = urlParams.get('hash');
+    if (hash) {
+        localStorage.setItem('durchsage_pwd', hash);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    
     checkAuth();
 
     document.getElementById('form-login').addEventListener('submit', async (e) => {
@@ -16,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.ok) {
                 const data = await res.json();
                 localStorage.setItem('durchsage_pwd', pwd);
-                handleLoginSuccess(data.password_changed);
+                handleLoginSuccess(data.password_changed, data.role || 'admin');
             } else {
                 showLoginError('Falsches Passwort.');
             }
@@ -245,7 +252,7 @@ async function checkAuth() {
         const res = await fetch('/api/auth_status');
         const data = await res.json();
         if (data.authenticated) {
-            handleLoginSuccess(data.password_changed);
+            handleLoginSuccess(data.password_changed, data.role || 'admin');
             return;
         }
     } catch (e) {
@@ -262,7 +269,7 @@ async function checkAuth() {
             });
             if (loginRes.ok) {
                 const data = await loginRes.json();
-                handleLoginSuccess(data.password_changed);
+                handleLoginSuccess(data.password_changed, data.role || 'admin');
                 return;
             } else {
                 localStorage.removeItem('durchsage_pwd');
@@ -453,6 +460,22 @@ async function loadConfig() {
     } catch (e) { }
 }
 
+
+window.regenerateUserHash = async function() {
+    if(!confirm("Bist du sicher? Alle bisherigen User-Links werden dadurch ungültig!")) return;
+    try {
+        const res = await fetch('/api/user_hash/regenerate', { method: 'POST' });
+        if(res.ok) {
+            alert("Erfolgreich generiert!");
+            loadConfig();
+        } else {
+            alert("Fehler beim Generieren.");
+        }
+    } catch(e) {
+        alert("Netzwerkfehler");
+    }
+};
+
 function renderConfigEditor() {
     const container = document.getElementById('config-editor-container');
     container.innerHTML = '';
@@ -518,6 +541,16 @@ function renderConfigEditor() {
     };
 
     let html = '';
+
+    // User Level Link
+    html += '<div class="config-group"><h5 class="text-primary mb-3">👤 User Level Control</h5>';
+    html += '<p class="text-muted small">Mit diesem Link können Benutzer manuell Durchsagen triggern, ohne Zugriff auf die Konfiguration zu haben.</p>';
+    if (currentConfig.ui && currentConfig.ui.user_hash) {
+        const userLink = window.location.origin + "/?hash=" + currentConfig.ui.user_hash;
+        html += `<div class="mb-3"><label class="form-label">Direkt-Link für Benutzer</label><div class="input-group"><input type="text" class="form-control" id="user-level-link" readonly value="${userLink}"><button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('user-level-link').value); alert('Link kopiert!')"><i class="fa-solid fa-copy"></i></button></div></div>`;
+    }
+    html += '<button type="button" class="btn btn-outline-warning w-100" onclick="regenerateUserHash()"><i class="fa-solid fa-rotate me-2"></i>User-Hash (Link) neu generieren</button>';
+    html += '</div>';
 
     // UI & Server
     html += '<div class="config-group"><h5 class="text-primary mb-3">🖥️ System & Web-UI</h5>';

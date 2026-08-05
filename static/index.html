@@ -66,13 +66,13 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-link-item"><a class="nav-link active" href="#"
                                 onclick="switchTab('dashboard')">Dashboard</a></li>
-                        <li class="nav-link-item"><a class="nav-link" href="#"
+                        <li class="nav-link-item" id="nav-item-config"><a class="nav-link" href="#"
                                 onclick="switchTab('config')">Konfiguration</a></li>
                         <li class="nav-link-item" id="nav-item-internet" style="display: none;"><a class="nav-link" href="#"
                                 onclick="switchTab('internet')">Internet</a></li>
-                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('logs')">Historie</a>
+                        <li class="nav-link-item" id="nav-item-logs"><a class="nav-link" href="#" onclick="switchTab('logs')">Historie</a>
                         </li>
-                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('gongs')">Gongs</a>
+                        <li class="nav-link-item" id="nav-item-gongs"><a class="nav-link" href="#" onclick="switchTab('gongs')">Gongs</a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
@@ -241,7 +241,7 @@
                             </form>
                         </div>
 
-                        <div class="control-box mt-4">
+                        <div class="control-box mt-4" id="system-wartung-box">
                             <h2 class="control-heading">System & Wartung</h2>
                             <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="downloadSyslog()">
                                 <i class="fa-solid fa-file-lines me-2"></i>Programmlog (30 Tage)
