@@ -7,13 +7,13 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     alsa-utils \
+    libasound2t64 \
     libsdl2-mixer-2.0-0 \
     libsdl2-image-2.0-0 \
     libsdl2-ttf-2.0-0 \
     git \
     network-manager \
     docker.io \
-    && (apt-get install -y --no-install-recommends libasound2 || apt-get install -y --no-install-recommends libasound2t64) \
     && rm -rf /var/lib/apt/lists/*
 
 # Arbeitsverzeichnis im Container setzen
