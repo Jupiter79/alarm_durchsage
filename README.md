@@ -2,7 +2,8 @@
 
 Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
 
-![Screenshot Web-Interface](https://github.com/user-attachments/assets/93bd993d-c8da-4334-afe2-d2af8156b4ec)
+<img width="1339" height="702" alt="image" src="https://github.com/user-attachments/assets/63941f2a-043c-4ad1-9797-6b7efd7d1730" />
+
 
 ---
 
