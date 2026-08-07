@@ -43,7 +43,7 @@ def load_config():
         default_cfg = {
             "repeatAlert": [1.5, 3, 4.5],
             "server": {"host": "0.0.0.0"},
-            "ui": {"port": 8122, "password": "122", "password_changed": False, "alarm_mode": "full"},
+            "ui": {"port": 8122, "password": "122", "user_hash": "", "password_changed": False, "alarm_mode": "full"},
             "credentials": {"base_url": "https://feuerwehr.einsatz.or.at", "username": "", "password": ""},
             "connection": {"reconnect_hours": 19},
             "audio": {"voice": "de-DE-KillianNeural", "gain_db": 9, "rate": "-10%", "gong_pause_sec": 1, "output_device": ""},
@@ -219,7 +219,7 @@ auth_lock = threading.Lock()
 active_timers = []
 
 # Simple Auth Token Management
-active_sessions = set()
+active_sessions = {}
 
 # =============================================================================
 # 2. AUDIO INITIALISIERUNG
@@ -714,20 +714,33 @@ async def verify_session(session_token: Optional[str] = Cookie(None)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     return True
 
+async def verify_admin_session(session_token: Optional[str] = Cookie(None)):
+    if session_token not in active_sessions or active_sessions[session_token] != "admin":
+        raise HTTPException(status_code=401, detail="Unauthorized (Admin only)")
+    return True
+
 @app.post("/api/login")
 def api_login(data: LoginData, response: Response):
     cfg_live = load_config()
+    user_hash = cfg_live["ui"].get("user_hash", "")
+    
     if data.password == cfg_live["ui"]["password"]:
         token = secrets.token_hex(32)
-        active_sessions.add(token)
+        active_sessions[token] = "admin"
         response.set_cookie(key="session_token", value=token, httponly=True, samesite='lax')
-        return {"status": "ok", "password_changed": cfg_live["ui"]["password_changed"]}
+        return {"status": "ok", "password_changed": cfg_live["ui"]["password_changed"], "role": "admin"}
+    elif user_hash and data.password == user_hash:
+        token = secrets.token_hex(32)
+        active_sessions[token] = "user"
+        response.set_cookie(key="session_token", value=token, httponly=True, samesite='lax')
+        return {"status": "ok", "password_changed": True, "role": "user"}
+        
     raise HTTPException(status_code=401, detail="Falsches Passwort")
 
 @app.post("/api/logout")
 def api_logout(response: Response, session_token: Optional[str] = Cookie(None)):
     if session_token in active_sessions:
-        active_sessions.remove(session_token)
+        del active_sessions[session_token]
     response.delete_cookie("session_token")
     return {"status": "ok"}
 
@@ -735,13 +748,14 @@ def api_logout(response: Response, session_token: Optional[str] = Cookie(None)):
 def api_auth_status(session_token: Optional[str] = Cookie(None)):
     cfg_live = load_config()
     if session_token in active_sessions:
-        return {"authenticated": True, "password_changed": cfg_live["ui"]["password_changed"]}
+        role = active_sessions[session_token]
+        return {"authenticated": True, "password_changed": cfg_live["ui"]["password_changed"], "role": role}
     return {"authenticated": False}
 
 @app.get("/api/update_check")
 def api_update_check(session_token: Optional[str] = Cookie(None)):
-    if session_token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if session_token not in active_sessions or active_sessions.get(session_token) != "admin":
+        raise HTTPException(status_code=401, detail="Unauthorized (Admin only)")
     
     cfg_live = load_config()
     current_version = cfg_live.get("version", "v1.0.0")
@@ -765,8 +779,8 @@ def api_update_check(session_token: Optional[str] = Cookie(None)):
 
 @app.post("/api/update_run")
 def api_update_run(session_token: Optional[str] = Cookie(None)):
-    if session_token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if session_token not in active_sessions or active_sessions.get(session_token) != "admin":
+        raise HTTPException(status_code=401, detail="Unauthorized (Admin only)")
     
     def run_update():
         logger.info("Starte Update-Prozess...")
@@ -890,7 +904,7 @@ def api_update_run(session_token: Optional[str] = Cookie(None)):
     threading.Thread(target=run_update, daemon=True).start()
     return {"status": "Update gestartet"}
 
-@app.post("/api/change_password", dependencies=[Depends(verify_session)])
+@app.post("/api/change_password", dependencies=[Depends(verify_admin_session)])
 def api_change_password(data: LoginData):
     if len(data.password) < 3:
         raise HTTPException(status_code=400, detail="Passwort zu kurz")
@@ -900,14 +914,24 @@ def api_change_password(data: LoginData):
     save_config(cfg_live)
     return {"status": "ok"}
 
-@app.get("/api/config", dependencies=[Depends(verify_session)])
+@app.post("/api/user_hash/regenerate", dependencies=[Depends(verify_admin_session)])
+def api_regenerate_user_hash():
+    cfg_live = load_config()
+    new_hash = secrets.token_hex(16)
+    if "ui" not in cfg_live:
+        cfg_live["ui"] = {}
+    cfg_live["ui"]["user_hash"] = new_hash
+    save_config(cfg_live)
+    return {"status": "ok", "hash": new_hash}
+
+@app.get("/api/config", dependencies=[Depends(verify_admin_session)])
 def api_get_config():
     cfg_live = load_config()
     # Passwort ausblenden
     cfg_live["ui"]["password"] = "***"
     return cfg_live
 
-@app.post("/api/config", dependencies=[Depends(verify_session)])
+@app.post("/api/config", dependencies=[Depends(verify_admin_session)])
 def api_save_config(new_config: dict = Body(...)):
     cfg_live = load_config()
     # Neues Passwort wird nicht via config update gespeichert, sondern nur über change_password
@@ -1012,7 +1036,7 @@ def api_clear_queue():
     logger.info(f"Warteschlange gelöscht! {count} aktive Timer beendet.")
     return {"status": "Stopped", "cancelled_timers": count}
 
-@app.get("/api/audio_devices", dependencies=[Depends(verify_session)])
+@app.get("/api/audio_devices", dependencies=[Depends(verify_admin_session)])
 def api_get_audio_devices():
     try:
         import pygame._sdl2.audio as sdl2_audio
@@ -1023,7 +1047,7 @@ def api_get_audio_devices():
         logger.exception(f"Fehler beim Abrufen der Audio-Geräte: ")
         return {"devices": []}
 
-@app.get("/api/syslog", dependencies=[Depends(verify_session)])
+@app.get("/api/syslog", dependencies=[Depends(verify_admin_session)])
 def api_get_syslog():
     try:
         with open("system.log", "r", encoding="utf-8") as f:
@@ -1031,7 +1055,7 @@ def api_get_syslog():
     except Exception:
         return Response(content="Systemlog leer oder nicht gefunden.", media_type="text/plain")
 
-@app.post("/api/reconnect", dependencies=[Depends(verify_session)])
+@app.post("/api/reconnect", dependencies=[Depends(verify_admin_session)])
 def api_reconnect():
     global connection_error_msg, last_disconnect_time
     success = login_external()
@@ -1046,7 +1070,7 @@ def api_reconnect():
             last_disconnect_time = time.time()
         return {"success": False, "error": connection_error_msg}
 
-@app.post("/api/restart", dependencies=[Depends(verify_session)])
+@app.post("/api/restart", dependencies=[Depends(verify_admin_session)])
 def api_restart():
     logger.warning("Benutzer hat System-Neustart angefordert. Beende Prozess in 1 Sekunde...")
     def do_restart():
@@ -1063,10 +1087,10 @@ def api_restart():
     threading.Thread(target=do_restart, daemon=True).start()
     return {"status": "ok", "message": "Neustart eingeleitet..."}
 
-@app.post("/api/uninstall")
+@app.delete("/api/uninstall")
 def api_uninstall(session_token: Optional[str] = Cookie(None)):
-    if session_token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Unauthorized")
+    if session_token not in active_sessions or active_sessions.get(session_token) != "admin":
+        raise HTTPException(status_code=401, detail="Unauthorized (Admin only)")
         
     logger.warning("Benutzer hat Deinstallation angefordert. Führe Uninstaller aus...")
     
@@ -1154,11 +1178,13 @@ def api_system_status():
             crit_error = "Fehler: Keine Verbindung zu feuerwehreinsatz.info möglich (Timeout > 20s)."
             
     network_disabled = os.environ.get("NETWORK_MANAGEMENT_DISABLED", "false").lower() == "true"
+    cfg_live = load_config()
     return {
         "ffmpeg_installed": has_ffmpeg,
         "os": platform.system(),
         "network_disabled": network_disabled,
-        "critical_error": crit_error
+        "critical_error": crit_error,
+        "alarm_mode": cfg_live.get("ui", {}).get("alarm_mode", "full")
     }
 
 
@@ -1167,7 +1193,7 @@ def api_get_gongs():
     cfg_live = load_config()
     return cfg_live.get("gongs", [])
 
-@app.post("/api/gongs", dependencies=[Depends(verify_session)])
+@app.post("/api/gongs", dependencies=[Depends(verify_admin_session)])
 def api_add_gong(name: str = Form(...), is_alarm: bool = Form(...), file: UploadFile = File(...)):
     cfg_live = load_config()
     gongs = cfg_live.get("gongs", [])
@@ -1190,7 +1216,7 @@ def api_add_gong(name: str = Form(...), is_alarm: bool = Form(...), file: Upload
     save_config(cfg_live)
     return {"status": "ok", "id": new_id}
 
-@app.put("/api/gongs/{gong_id}", dependencies=[Depends(verify_session)])
+@app.put("/api/gongs/{gong_id}", dependencies=[Depends(verify_admin_session)])
 def api_update_gong(gong_id: int, data: dict = Body(...)):
     cfg_live = load_config()
     gongs = cfg_live.get("gongs", [])
@@ -1202,7 +1228,7 @@ def api_update_gong(gong_id: int, data: dict = Body(...)):
             return {"status": "ok"}
     raise HTTPException(status_code=404, detail="Gong nicht gefunden")
 
-@app.delete("/api/gongs/{gong_id}", dependencies=[Depends(verify_session)])
+@app.delete("/api/gongs/{gong_id}", dependencies=[Depends(verify_admin_session)])
 def api_delete_gong(gong_id: int):
     if gong_id in [1, 2]:
         raise HTTPException(status_code=400, detail="Einsatz- und Folgeeinsatz-Gong (1 und 2) duerfen nicht geloescht werden.")
@@ -1222,7 +1248,7 @@ def api_delete_gong(gong_id: int):
     save_config(cfg_live)
     return {"status": "ok"}
 
-@app.post("/api/gongs/{gong_id}/audio", dependencies=[Depends(verify_session)])
+@app.post("/api/gongs/{gong_id}/audio", dependencies=[Depends(verify_admin_session)])
 def api_replace_gong_audio(gong_id: int, file: UploadFile = File(...)):
     cfg_live = load_config()
     if not any(g["id"] == gong_id for g in cfg_live.get("gongs", [])):
@@ -1235,7 +1261,7 @@ def api_replace_gong_audio(gong_id: int, file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
     return {"status": "ok"}
 
-@app.post("/api/gongs/{gong_id}/reset", dependencies=[Depends(verify_session)])
+@app.post("/api/gongs/{gong_id}/reset", dependencies=[Depends(verify_admin_session)])
 def api_reset_gong(gong_id: int):
     if gong_id not in [1, 2]:
         raise HTTPException(status_code=400, detail="Nur Einsatz- und Folgeeinsatz-Gong (1 und 2) können auf Standard zurückgesetzt werden.")
@@ -1263,7 +1289,7 @@ def api_get_gong_audio(gong_id: int):
 # 9.5 NETWORK SETTINGS (LAN / WLAN)
 # =============================================================================
 
-@app.get("/api/network/status", dependencies=[Depends(verify_session)])
+@app.get("/api/network/status", dependencies=[Depends(verify_admin_session)])
 def api_get_network_status():
     system = platform.system()
     
@@ -1290,7 +1316,7 @@ def api_get_network_status():
             
     return status
 
-@app.get("/api/network/wifi", dependencies=[Depends(verify_session)])
+@app.get("/api/network/wifi", dependencies=[Depends(verify_admin_session)])
 def api_get_wifi_networks():
     system = platform.system()
     
@@ -1316,7 +1342,7 @@ class NetworkConnectRequest(BaseModel):
     ssid: Optional[str] = None
     password: Optional[str] = None
 
-@app.post("/api/network/connect", dependencies=[Depends(verify_session)])
+@app.post("/api/network/connect", dependencies=[Depends(verify_admin_session)])
 def api_network_connect(req: NetworkConnectRequest):
     system = platform.system()
     

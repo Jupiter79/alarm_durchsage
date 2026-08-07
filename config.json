@@ -11,7 +11,8 @@
         "port": 8122,
         "password": "122",
         "password_changed": false,
-        "alarm_mode": "full"
+        "alarm_mode": "full",
+        "user_hash": ""
     },
     "credentials": {
         "base_url": "https://feuerwehr.einsatz.or.at",
@@ -55,7 +56,7 @@
         },
         {
             "id": 5,
-            "name": "Durchsage (ÖBB)",
+            "name": "Durchsage (\u00d6BB)",
             "is_alarm": false
         }
     ],
@@ -85,8 +86,8 @@
             "T PERSON": "Technischer Einsatz, Person in Gefahr",
             "WASSER": "Wasserdiensteinsatz",
             "FLUGNOT": "Notlage Luftfahrzeug",
-            "T WASSER": "Technischer Einsatz auf Gewässer",
-            "T PERSON WASSER": "Personenrettung auf Gewässer"
+            "T WASSER": "Technischer Einsatz auf Gew\u00e4sser",
+            "T PERSON WASSER": "Personenrettung auf Gew\u00e4sser"
         },
         "address_replacements": {
             ">": "Fahrtrichtung",
@@ -98,5 +99,5 @@
     "webhook": {
         "url": ""
     },
-    "version": "v1.0.1"
+    "version": "v1.1.0"
 }

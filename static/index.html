@@ -57,7 +57,7 @@
         <!-- Navbar -->
         <nav class="navbar navbar-expand-lg">
             <div class="container">
-                <a class="navbar-brand" href="#"><i class="fa-solid fa-fire-extinguisher me-2"></i>Alarmdurchsage
+                <a class="navbar-brand" href="#"><i class="fa-solid fa-bullhorn me-2"></i>Alarmdurchsage
                     Server</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
@@ -66,16 +66,17 @@
                     <ul class="navbar-nav me-auto">
                         <li class="nav-link-item"><a class="nav-link active" href="#"
                                 onclick="switchTab('dashboard')">Dashboard</a></li>
-                        <li class="nav-link-item"><a class="nav-link" href="#"
+                        <li class="nav-link-item" id="nav-item-config"><a class="nav-link" href="#"
                                 onclick="switchTab('config')">Konfiguration</a></li>
                         <li class="nav-link-item" id="nav-item-internet" style="display: none;"><a class="nav-link" href="#"
                                 onclick="switchTab('internet')">Internet</a></li>
-                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('logs')">Historie</a>
+                        <li class="nav-link-item" id="nav-item-logs"><a class="nav-link" href="#" onclick="switchTab('logs')">Historie</a>
                         </li>
-                        <li class="nav-link-item"><a class="nav-link" href="#" onclick="switchTab('gongs')">Gongs</a>
+                        <li class="nav-link-item" id="nav-item-gongs"><a class="nav-link" href="#" onclick="switchTab('gongs')">Gongs</a>
                         </li>
                     </ul>
                     <div class="d-flex align-items-center">
+                        <span id="role-badge" class="badge me-2"></span>
                         <span id="status-badge" class="badge-status error me-3">Getrennt</span>
                         <button class="btn btn-outline-secondary btn-sm" onclick="logout()">Logout</button>
                     </div>
@@ -241,7 +242,7 @@
                             </form>
                         </div>
 
-                        <div class="control-box mt-4">
+                        <div class="control-box mt-4" id="system-wartung-box">
                             <h2 class="control-heading">System & Wartung</h2>
                             <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="downloadSyslog()">
                                 <i class="fa-solid fa-file-lines me-2"></i>Programmlog (30 Tage)
@@ -418,7 +419,7 @@
                     </div>
                 </div>
 
-                <div class="glass-card">
+                <div class="glass-card" id="gong-admin-section">
                     <h4 class="mb-3">Neuen Gong hinzufügen</h4>
                     <form id="form-upload-gong">
                         <div class="row g-3">

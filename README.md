@@ -2,13 +2,14 @@
 
 Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
 
-![Screenshot Web-Interface](https://github.com/user-attachments/assets/93bd993d-c8da-4334-afe2-d2af8156b4ec)
+<img width="1339" height="702" alt="image" src="https://github.com/user-attachments/assets/63941f2a-043c-4ad1-9797-6b7efd7d1730" />
+
 
 ---
 
 ## 👨‍🔧 Instandhaltung & Kontakt
 
-Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**.
+Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**. Alternativ können neue Features oder Probleme jederzeit mittels eines Issues auf der GitHub-Seite eröffnet werden.
 
 ---
 
@@ -20,6 +21,23 @@ Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ
 1. **Aufmerksamkeit:** Es spielt sofort einen lauten **Gong** über die Lautsprecheranlage ab.
 2. **Information:** Es liest mit einer klaren, natürlichen Computerstimme die **Einsatzdaten** vor (z. B. Einsatzart, Adresse, Zusatzinformationen).
 3. **Wiederholung:** Die Durchsage wird nach vorgegebenen Zeiten automatisch wiederholt (z.B. nach 1,5 und 3 Minuten). Das ist extrem hilfreich für alle Kameradinnen und Kameraden, die nicht sofort bei der Alarmierung im Rüsthaus sind, sondern erst nach und nach einrücken.
+
+Hinweis: Bei selbst angelegten Einsätzen (über Kommando-Login) erfolgt keine Durchsage.
+
+---
+
+## 👥 Bedienung: Admin- und User-Ansicht
+
+Das Web-Interface bietet zwei verschiedene Ansichten, um das System im Feuerwehrhaus optimal und sicher nutzen zu können:
+
+### 🔴 Admin-Ansicht
+In der Admin-Ansicht (Zugang über das Passwort) hast du die volle Kontrolle über das gesamte System. Hier kannst du alle Konfigurationen vornehmen, Gongs hochladen oder löschen, WLAN-Netzwerke verwalten, Logs einsehen und Systemupdates durchführen.
+
+### 🔵 User-Ansicht (Eingeschränkter Modus)
+Die User-Ansicht ist speziell für den alltäglichen Gebrauch gedacht – idealerweise auf einem PC direkt neben der Funkfixstation oder der Florianstation deiner Feuerwehr.
+Über einen speziellen Direkt-Link (den der Admin im Konfigurations-Tab generieren und kopieren kann) gelangt man sofort in diesen eingeschränkten Modus, ganz ohne Passwort-Eingabe.
+In dieser Ansicht können Benutzer lediglich manuell Durchsagen triggern, die Einsatzhistorie einsehen und Gongs abspielen. Sämtliche kritischen Einstellungen (System, Konfiguration, Löschen von Gongs) sind komplett ausgeblendet und serverseitig gesperrt.
+**Tipp:** Speichere diesen Direkt-Link auf dem PC in der Florianstation einfach als Desktop-Verknüpfung (Shortcut). So können die Kameradinnen und Kameraden das Interface mit nur einem Klick öffnen und Durchsagen machen, ohne etwas verstellen zu können!
 
 ---
 
