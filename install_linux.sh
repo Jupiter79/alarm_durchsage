@@ -202,6 +202,47 @@ rm -rf system.log log.json 2>/dev/null || true
 touch system.log log.json
 echo "NETWORK_MANAGEMENT_DISABLED=$KEEP_NETWORK" > .env
 
+# Audio-Konfiguration ermitteln
+AUDIO_DEVICE_MOUNT="/dev/snd:/dev/snd"
+PULSE_SOCKET_MOUNT="/dev/null:/tmp/dummy_pulse"
+PULSE_COOKIE_MOUNT="/dev/null:/tmp/dummy_cookie"
+SDL_AUDIODRIVER="alsa"
+PULSE_SERVER=""
+
+if pgrep -x "pulseaudio" > /dev/null || pgrep -x "pipewire" > /dev/null || pgrep -x "pipewire-pulse" > /dev/null; then
+    echo ">>> Desktop-Audio (PulseAudio/Pipewire) erkannt. Passe Docker an..."
+    
+    # Finde den aktiven Desktop-Benutzer
+    if [ -n "$SUDO_USER" ]; then
+        DESKTOP_USER=$SUDO_USER
+    else
+        DESKTOP_USER=$(who | awk '{print $1}' | head -n 1)
+        [ -z "$DESKTOP_USER" ] && DESKTOP_USER=$USER
+    fi
+    USER_ID=$(id -u $DESKTOP_USER)
+    
+    if [ -S "/run/user/$USER_ID/pulse/native" ]; then
+        echo ">>> Konfiguriere PulseAudio Passthrough für Benutzer $DESKTOP_USER (ID $USER_ID)..."
+        PULSE_SOCKET_MOUNT="/run/user/$USER_ID/pulse:/run/user/$USER_ID/pulse"
+        PULSE_SERVER="unix:/run/user/$USER_ID/pulse/native"
+        SDL_AUDIODRIVER="pulse"
+        
+        # Cookie mapping für Authentifizierung
+        PULSE_COOKIE_FILE="$(eval echo ~$DESKTOP_USER)/.config/pulse/cookie"
+        if [ -f "$PULSE_COOKIE_FILE" ]; then
+            PULSE_COOKIE_MOUNT="$PULSE_COOKIE_FILE:/root/.config/pulse/cookie:ro"
+        fi
+    fi
+fi
+
+echo "AUDIO_DEVICE_MOUNT=$AUDIO_DEVICE_MOUNT" >> .env
+echo "PULSE_SOCKET_MOUNT=$PULSE_SOCKET_MOUNT" >> .env
+echo "PULSE_COOKIE_MOUNT=$PULSE_COOKIE_MOUNT" >> .env
+echo "SDL_AUDIODRIVER=$SDL_AUDIODRIVER" >> .env
+if [ -n "$PULSE_SERVER" ]; then
+    echo "PULSE_SERVER=$PULSE_SERVER" >> .env
+fi
+
 # 5. Docker Container bauen und starten
 echo ">>> [5/6] Baue und starte den Container (Linux-Profil mit Audio)..."
 # Wir nutzen sudo docker, da die usermod-Änderung aus Schritt 2 ohne Abmelden noch nicht greift

@@ -25,10 +25,13 @@ services:
     environment:
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
       - XDG_RUNTIME_DIR=/tmp/runtime-root
-      - SDL_AUDIODRIVER=alsa
+      - SDL_AUDIODRIVER=${SDL_AUDIODRIVER:-alsa}
       - NETWORK_MANAGEMENT_DISABLED=${NETWORK_MANAGEMENT_DISABLED:-false}
+      - PULSE_SERVER=${PULSE_SERVER}
     volumes:
-      - "/dev/snd:/dev/snd"
+      - "${AUDIO_DEVICE_MOUNT:-/dev/snd:/dev/snd}"
+      - "${PULSE_SOCKET_MOUNT:-/dev/null:/tmp/dummy_pulse}"
+      - "${PULSE_COOKIE_MOUNT:-/dev/null:/tmp/dummy_cookie}"
       - ./:/app
       - /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket
       - /var/run/docker.sock:/var/run/docker.sock

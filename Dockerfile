@@ -7,6 +7,7 @@ FROM python:3.11-slim
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     alsa-utils \
+    libpulse0 \
     gcc \
     pkg-config \
     libsdl2-dev \
