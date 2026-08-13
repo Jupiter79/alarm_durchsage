@@ -640,6 +640,7 @@ function renderConfigEditor() {
     html += createInput('Pause nach Gong (Sekunden)', 'audio.gong_pause_sec', currentConfig.audio.gong_pause_sec, 'number', 'Wie viele Sekunden Stille sollen zwischen dem Ende des Gongs und dem Start der Sprachansage vergehen? (Empfohlen: 1 oder 1.5)');
     html += createSelect('Audio Ausgabe-Gerät', 'audio.output_device', currentConfig.audio.output_device || '', availableAudioDevices, 'Wähle den System-Lautsprecherausgang. Empfehlung: Am Raspberry Pi den nativen Aux-Ausgang (oft "bcm2835 ALSA" oder "Headphones") verwenden. Je nach Anlage wird hierfür oft ein "AUX auf Cinch" Kabeladapter benötigt. ACHTUNG: Bei Änderung muss das Programm neu gestartet werden!');
     html += '<button type="button" class="btn btn-outline-danger px-4" onclick="triggerTestAlarm()" title="Löst einen Einsatz inklusive geplanten Wiederholungen aus"><i class="fa-solid fa-bell me-2"></i>Test-Einsatz simulieren</button>';
+    html += '<div class="text-muted small mt-2">Hinweis: Der Alarm startet nach dem Klick zufällig innerhalb der nächsten 15 bis 30 Sekunden, um einen echten Einsatzaufbau zu simulieren.</div>';
     html += '<div class="alert alert-secondary mt-3 mb-0 border-0" style="font-size: 0.85rem;"><i class="fa-solid fa-circle-info me-2"></i><strong>Hinweis zum Datenschutz (TTS):</strong> Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>edge_tts</code> verwendet. Die Textdaten werden zur Umwandlung an Microsoft-Server gesendet (genaue Ziel-URL: <code>wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1</code>).</div>';
     html += '</div>';
 
@@ -955,11 +956,11 @@ function populateGongsSelect() {
 }
 
 async function triggerTestAlarm() {
-    if (!confirm("Achtung: Dies löst einen Test-Alarm aus, der WIE EIN ECHTER EINSATZ verarbeitet wird (inklusive Gong, Durchsage und geplanten Wiederholungen). Fortfahren?")) return;
+    if (!confirm("Achtung: Dies löst einen Test-Alarm aus, der WIE EIN ECHTER EINSATZ verarbeitet wird (inklusive Gong, Durchsage und geplanten Wiederholungen). Der Einsatz wird nach einer zufälligen Verzögerung (15-30 Sekunden) starten. Fortfahren?")) return;
     try {
         const res = await fetch('/api/test_alarm', { method: 'POST' });
         if (res.ok) {
-            alert("Test-Einsatz wurde gestartet.");
+            alert("Test-Einsatz wurde in die Warteschlange eingereiht und startet zufällig in 15 bis 30 Sekunden!");
             loadLogs(); // Update history
         } else {
             alert("Fehler beim Starten des Test-Einsatzes.");

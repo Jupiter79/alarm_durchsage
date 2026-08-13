@@ -1017,7 +1017,15 @@ def api_settings_alarm_mode(req: AlarmModeRequest):
 def api_test_alarm():
     test_id = f"test_alarm_{int(time.time())}"
     data_dict = get_test_alarm_payload(test_id)
-    process_alarm_logic(data_dict)
+    
+    import random
+    delay = random.randint(15, 30)
+    
+    def delayed_trigger():
+        time.sleep(delay)
+        process_alarm_logic(data_dict)
+        
+    threading.Thread(target=delayed_trigger, daemon=True).start()
     return {"status": "ok"}
 
 @app.delete("/api/queue", dependencies=[Depends(verify_session)])
