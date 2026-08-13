@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('durchsage_pwd', hash);
         window.history.replaceState({}, document.title, window.location.pathname);
     }
-    
+
     checkAuth();
 
     document.getElementById('form-login').addEventListener('submit', async (e) => {
@@ -300,7 +300,7 @@ function handleLoginSuccess(passwordChanged, role) {
             if (gongAdmin) gongAdmin.style.display = 'none';
             const gongsTab = document.getElementById('nav-item-gongs');
             if (gongsTab) gongsTab.style.display = 'block';
-            
+
             const roleBadge = document.getElementById('role-badge');
             if (roleBadge) {
                 roleBadge.className = 'badge bg-primary me-2';
@@ -315,7 +315,7 @@ function handleLoginSuccess(passwordChanged, role) {
             if (wartungBox) wartungBox.style.display = 'block';
             const gongAdmin = document.getElementById('gong-admin-section');
             if (gongAdmin) gongAdmin.style.display = 'block';
-            
+
             const roleBadge = document.getElementById('role-badge');
             if (roleBadge) {
                 roleBadge.className = 'badge bg-danger me-2';
@@ -338,7 +338,7 @@ async function logout() {
 function showView(viewId) {
     document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
-    
+
 
 }
 
@@ -356,7 +356,7 @@ function switchTab(tabId) {
     if (tabId === 'internet') {
         loadNetworkStatus();
     }
-    
+
 
 }
 
@@ -376,6 +376,10 @@ function showCpError(msg) {
 async function checkSystemStatus() {
     try {
         const res = await fetch('/api/system_status');
+        if (res.status === 401) {
+            window.location.reload();
+            return;
+        }
         if (res.ok) {
             const status = await res.json();
 
@@ -395,13 +399,13 @@ async function checkSystemStatus() {
             // OS Dependent UI
             const navItem = document.getElementById('nav-item-internet');
             const uninstallContainer = document.getElementById('uninstall-container');
-            
+
             if (status.os === 'Windows') {
                 if (uninstallContainer) uninstallContainer.style.display = 'block';
             } else {
                 if (uninstallContainer) uninstallContainer.style.display = 'none';
             }
-            
+
             if (status.os === 'Windows' || status.network_disabled) {
                 if (navItem) navItem.style.display = 'none';
             } else {
@@ -449,7 +453,7 @@ async function initApp() {
     if (window.currentRole === 'admin') {
         // Load config to set alarm mode initially
         await loadConfig();
-        
+
         // Check for updates
         checkUpdate();
     } else {
@@ -460,7 +464,7 @@ async function initApp() {
                 currentConfig = { gongs: await res.json() };
                 populateGongsSelect();
             }
-        } catch(e) {}
+        } catch (e) { }
     }
 }
 
@@ -508,17 +512,17 @@ async function loadConfig() {
 }
 
 
-window.regenerateUserHash = async function() {
-    if(!confirm("Bist du sicher? Alle bisherigen User-Links werden dadurch ungültig!")) return;
+window.regenerateUserHash = async function () {
+    if (!confirm("Bist du sicher? Alle bisherigen User-Links werden dadurch ungültig!")) return;
     try {
         const res = await fetch('/api/user_hash/regenerate', { method: 'POST' });
-        if(res.ok) {
+        if (res.ok) {
             alert("Erfolgreich generiert!");
             loadConfig();
         } else {
             alert("Fehler beim Generieren.");
         }
-    } catch(e) {
+    } catch (e) {
         alert("Netzwerkfehler");
     }
 };
@@ -853,7 +857,7 @@ async function loadGongs() {
             tbody.innerHTML = '';
             gongs.forEach(g => {
                 const isAlarmText = g.is_alarm ? '<span class="badge bg-danger">Alarm</span>' : '<span class="badge bg-secondary">Durchsage</span>';
-                
+
                 let adminActions = '';
                 if (window.currentRole === 'admin') {
                     let deleteBtn = `<button class="btn btn-sm btn-outline-danger" onclick="deleteGong(${g.id})" title="Löschen"><i class="fa-solid fa-trash"></i></button>`;
@@ -1051,7 +1055,7 @@ window.loadNetworkStatus = async function () {
         const res = await fetch('/api/network/status');
         if (res.ok) {
             const data = await res.json();
-            
+
             if (data.mode === 'disabled' || data.os === 'Windows') {
                 const navItem = document.querySelector('a[onclick="switchTab(\'internet\')"]');
                 if (navItem) {
@@ -1064,7 +1068,7 @@ window.loadNetworkStatus = async function () {
                 }
                 return;
             }
-            
+
             if (data.mode === 'wlan' && data.ssid) {
                 const wlanRadio = document.querySelector('input[name="internet_mode"][value="wlan"]');
                 if (wlanRadio) {
@@ -1129,14 +1133,14 @@ async function checkUpdate() {
 
 async function runUpdate() {
     if (!confirm("Möchtest du das Update jetzt installieren? Der Server wird dabei neu gestartet.")) return;
-    
+
     const btn = document.getElementById('btn-run-update');
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Wird installiert...';
     btn.disabled = true;
-    
+
     try {
         await fetch('/api/update_run', { method: 'POST' });
-        
+
         let attempts = 0;
         const checkAlive = setInterval(async () => {
             attempts++;
@@ -1146,14 +1150,14 @@ async function runUpdate() {
                     clearInterval(checkAlive);
                     window.location.reload();
                 }
-            } catch (e) {}
-            
+            } catch (e) { }
+
             if (attempts > 30) {
                 clearInterval(checkAlive);
                 alert("Update dauerte zu lange. Bitte lade die Seite manuell neu.");
             }
         }, 2000);
-        
+
     } catch (e) {
         alert("Fehler beim Starten des Updates.");
         btn.innerHTML = '<i class="fa-solid fa-arrows-rotate me-2"></i>Jetzt aktualisieren';
