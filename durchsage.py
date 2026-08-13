@@ -217,6 +217,8 @@ log_lock = threading.Lock()
 timers_lock = threading.Lock()
 auth_lock = threading.Lock()
 active_timers = []
+processed_alarm_ids = set()
+processed_alarm_ids_lock = threading.Lock()
 
 # Simple Auth Token Management
 active_sessions = {}
@@ -616,9 +618,14 @@ def execute_repeated_announcement(mission_id):
 def process_alarm_logic(data_dict: dict):
     einsatz_id = data_dict.get("id")
     
-    if einsatz_id and is_event_processed(einsatz_id):
-        logger.info(f"Alarm mit ID {einsatz_id} ignoriert, da bereits verarbeitet (Duplikat).")
-        return {"status": "Duplicate", "id": einsatz_id}
+    if einsatz_id:
+        einsatz_id_str = str(einsatz_id)
+        with processed_alarm_ids_lock:
+            if einsatz_id_str in processed_alarm_ids or is_event_processed(einsatz_id):
+                processed_alarm_ids.add(einsatz_id_str)
+                logger.info(f"Alarm mit ID {einsatz_id} ignoriert, da bereits verarbeitet (Duplikat).")
+                return {"status": "Duplicate", "id": einsatz_id}
+            processed_alarm_ids.add(einsatz_id_str)
 
     logger.info(f"Verarbeite neuen Einsatz: ID {einsatz_id}, Typ: {data_dict.get('type')}")
     text = create_announcement_text(data_dict)
