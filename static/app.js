@@ -666,11 +666,22 @@ function renderConfigEditor() {
     html += createDictEditor('Adress-Sonderfälle bereinigen', 'text_processing.address_replacements', currentConfig.text_processing.address_replacements, 'Ähnlich wie Abkürzungen, greift aber NUR bei der Adresse! Z.B. "AS" durch "Anschlussstelle" oder ein Pfeil ">" durch "Fahrtrichtung".');
     html += '</div>';
 
-    // API & Webhook
-    html += '<div class="config-group"><h5 class="text-primary mb-3">🔗 API & Webhook</h5>';
+    // API, Webhook & Wake on LAN
+    html += '<div class="config-group"><h5 class="text-primary mb-3">🔗 API, Webhook & Wake on LAN</h5>';
     html += '<p class="text-muted small">Die API-URL kann aufgerufen werden, um zu prüfen ob aktuell ein Einsatz läuft ("true" oder "false").</p>';
     html += `<div class="mb-3"><label class="form-label">API-Status Link</label><div class="input-group"><input type="text" class="form-control" readonly value="${window.location.origin}/api/is_active"><button class="btn btn-outline-secondary" type="button" onclick="window.open('${window.location.origin}/api/is_active', '_blank')"><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div></div>`;
     html += createInput('Webhook URL', 'webhook.url', currentConfig.webhook?.url || '', 'url', 'Diese URL wird 1x aufgerufen (GET), sobald eine Alarmierung (Einsatz oder Probe) stattfindet. Nützlich für Smart-Home Anbindungen.');
+    html += createInput('Wake on LAN MAC-Adressen', 'wake_on_lan.macs', currentConfig.wake_on_lan?.macs || '', 'text', 'Kommagetrennte Liste von MAC-Adressen (z.B. AA:BB:CC:DD:EE:FF,AB:CD:EF:12:34:56), die bei einem Alarm geweckt werden sollen. Was ist Wake on LAN und wie richte ich es am PC ein? <a href="https://www.heise.de/tipps-tricks/Wake-on-LAN-was-ist-das-4585127.html" target="_blank">Hier klicken für eine Anleitung</a>.');
+    html += `
+        <div class="mb-3">
+            <label class="form-label">Wake on LAN Port</label>
+            <select class="form-select" data-path="wake_on_lan.port">
+                <option value="9" ${currentConfig.wake_on_lan?.port == 9 ? 'selected' : ''}>Port 9 (Standard)</option>
+                <option value="7" ${currentConfig.wake_on_lan?.port == 7 ? 'selected' : ''}>Port 7</option>
+            </select>
+            <div class="form-text">Der UDP-Port für das Magic Packet.</div>
+        </div>
+    `;
     html += '</div>';
 
     container.innerHTML = html;
@@ -695,6 +706,7 @@ async function saveConfig() {
         const parts = path.split('.');
         let curr = obj;
         for (let i = 0; i < parts.length - 1; i++) {
+            if (!curr[parts[i]]) curr[parts[i]] = {};
             curr = curr[parts[i]];
         }
         curr[parts[parts.length - 1]] = val;

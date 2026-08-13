@@ -106,6 +106,15 @@ Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem R
 
 ---
 
+## 🔗 Webhook & Wake on LAN (Smart Home & Zusatz-Monitore)
+
+Das System bietet dir die Möglichkeit, bei einem eingehenden Alarm (oder Test-Alarm) externe Systeme anzusteuern:
+
+* **Webhook URL:** Du kannst eine beliebige URL eintragen (z.B. für Home Assistant, ioBroker, Loxone). Sobald ein Alarm eingeht, wird diese URL (per GET-Request) aufgerufen. Damit lässt sich im Feuerwehrhaus beispielsweise automatisch das Licht einschalten oder das Garagentor öffnen.
+* **Wake on LAN (WoL):** Was ist das und was bringt es? Wake on LAN ermöglicht es, netzwerkfähige Geräte (z. B. einen ausgeschalteten PC oder einen Einsatz-Monitor an der Wand) über das Netzwerk aufzuwecken. Trage einfach die MAC-Adresse (z.B. `AA:BB:CC:DD:EE:FF`) des PCs ein. Sobald ein Alarm eintrifft, sendet das System ein "Magic Packet" an das Gerät, wodurch es automatisch hochfährt. Eine genaue Anleitung, wie man PCs für Wake on LAN konfiguriert, findest du z. B. [hier bei Heise.de](https://www.heise.de/tipps-tricks/Wake-on-LAN-Windows-10-PC-aufwecken-so-geht-s-4309650.html). In der Konfiguration kann der UDP-Port (meist 9, seltener 7) ausgewählt werden.
+
+---
+
 ## 💻 Bedienung & Zugriff (Das Web-Interface)
 
 Das System verfügt über eine grafische Oberfläche (Webseite). Du musst absolut kein Computer-Experte sein, um das System zu bedienen oder Einstellungen zu ändern.

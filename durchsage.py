@@ -72,7 +72,8 @@ def load_config():
                     ">": "Fahrtrichtung", "UFT": "Unterflurtrasse", "AS": "Anschlussstelle", "Km": "Kilometer"
                 }
             },
-            "webhook": {"url": ""}
+            "webhook": {"url": ""},
+            "wake_on_lan": {"macs": "", "port": 9}
         }
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(default_cfg, f, indent=4, ensure_ascii=False)
@@ -660,6 +661,43 @@ def process_alarm_logic(data_dict: dict):
                 except Exception as e:
                     logger.exception(f"Fehler beim Webhook-Aufruf: ")
             threading.Thread(target=call_webhook, args=(webhook_url,), daemon=True).start()
+
+        # Wake on LAN
+        wol_macs = cfg_live.get("wake_on_lan", {}).get("macs", "")
+        if wol_macs:
+            def send_wol(mac_str):
+                import socket
+                import binascii
+                
+                # Ermittle Broadcast Adresse
+                broadcast_ip = "255.255.255.255"
+                try:
+                    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                    s.connect(("8.8.8.8", 80))
+                    local_ip = s.getsockname()[0]
+                    s.close()
+                    parts = local_ip.split('.')
+                    if len(parts) == 4:
+                        broadcast_ip = f"{parts[0]}.{parts[1]}.{parts[2]}.255"
+                except Exception:
+                    pass
+                    
+                port = int(cfg_live.get("wake_on_lan", {}).get("port", 9))
+                
+                for mac in mac_str.split(","):
+                    mac_clean = mac.strip().replace(':', '').replace('-', '')
+                    if len(mac_clean) == 12:
+                        try:
+                            data = b'FF' * 6 + (mac_clean * 16).encode()
+                            send_data = binascii.unhexlify(data)
+                            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+                            sock.sendto(send_data, (broadcast_ip, port))
+                            sock.close()
+                            logger.info(f"WoL Magic Packet gesendet an: {mac.strip()} (IP: {broadcast_ip}:{port})")
+                        except Exception as e:
+                            logger.exception(f"Fehler beim Senden des WoL Packets an {mac.strip()}: ")
+            threading.Thread(target=send_wol, args=(wol_macs,), daemon=True).start()
 
         repeats = cfg_live.get("repeatAlert", []) 
         if repeats and isinstance(repeats, list):

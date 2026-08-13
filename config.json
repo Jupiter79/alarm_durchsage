@@ -99,5 +99,9 @@
     "webhook": {
         "url": ""
     },
+    "wake_on_lan": {
+        "macs": "",
+        "port": 9
+    },
     "version": "v1.1.3"
 }
