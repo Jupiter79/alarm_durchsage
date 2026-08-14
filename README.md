@@ -1,9 +1,8 @@
 # 🚒 Feuerwehr Alarm Durchsage Server
 
-Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in einfachen Worten, was dieses System macht, wie es funktioniert und wie man es bedient.
+Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfachen Worten, was dieses System macht, wie es dir und deiner Feuerwehr im Einsatzfall hilft und wie man es bedient.
 
 <img width="1339" height="702" alt="image" src="https://github.com/user-attachments/assets/63941f2a-043c-4ad1-9797-6b7efd7d1730" />
-
 
 ---
 
@@ -15,40 +14,44 @@ Ich (Sergio Huainigg von der Feuerwehr Spittal/Drau) entwickle und betreue das S
 
 ## ℹ️ Worum geht es?
 
-Dieses System sorgt für die automatische Alarmdurchsage im Feuerwehrhaus. 
-Wenn ein echter Einsatz über die Leitstelle (Leitstellenverbund Kärnten / LAWZ) hereinkommt, reagiert das System sofort und völlig automatisch:
+Stell dir vor, der Peeper geht und es gibt einen Einsatz. Anstatt dass die ankommenden Kameraden erst auf einen kleinen Pager oder einen Einsatzmonitor an der Wand schauen müssen, um zu wissen, worum es überhaupt geht, übernimmt dieses System die Informationsweitergabe: **Es spricht zu euch!**
 
-1. **Aufmerksamkeit:** Es spielt sofort einen lauten **Gong** über die Lautsprecheranlage ab.
-2. **Information:** Es liest mit einer klaren, natürlichen Computerstimme die **Einsatzdaten** vor (z. B. Einsatzart, Adresse, Zusatzinformationen).
-3. **Wiederholung:** Die Durchsage wird nach vorgegebenen Zeiten automatisch wiederholt (z.B. nach 1,5 und 3 Minuten). Das ist extrem hilfreich für alle Kameradinnen und Kameraden, die nicht sofort bei der Alarmierung im Rüsthaus sind, sondern erst nach und nach einrücken.
+Das Programm läuft als "unsichtbarer" Helfer im Hintergrund und lauscht vollautomatisch auf Alarme der Leitstelle (Leitstellenverbund Kärnten / LAWZ). Wenn ein echter Einsatz für deine Feuerwehr eingeht, passiert sofort Folgendes:
 
-Hinweis: Bei selbst angelegten Einsätzen (über Kommando-Login) erfolgt keine Durchsage.
+1. **Aufmerksamkeit (Der Gong):** Es ertönt ein lauter Alarm-Gong im Feuerwehrhaus, damit jeder weiß: Jetzt geht's los.
+2. **Information (Die Sprachausgabe):** Eine sehr deutliche und natürliche Computerstimme liest sofort alle wichtigen Einsatzdaten vor (z. B. "Brandeinsatz! Hauptstraße 5! Information: Rauchentwicklung im Gebäude!").
+3. **Wiederholungen für Nachzügler:** Weil bei einer Alarmierung nicht alle gleichzeitig im Rüsthaus eintreffen, wiederholt das System die komplette Durchsage nach ein paar Minuten automatisch (z.B. nach 1,5 und nach 3 Minuten). So sind auch die Nachzügler sofort informiert, während sie sich in der Umkleide umziehen.
+
+**Der große Vorteil:** Zeitersparnis und sofortige, unüberhörbare Information für alle anwesenden Einsatzkräfte, ohne dass jemand aktiv etwas ablesen muss.
+
+*(Hinweis: Bei selbst angelegten Einsätzen über Kommando-Login erfolgt keine automatische Durchsage).*
 
 ---
 
 ## 👥 Bedienung: Admin- und User-Ansicht
 
-Das Web-Interface bietet zwei verschiedene Ansichten, um das System im Feuerwehrhaus optimal und sicher nutzen zu können:
+Das System bietet eine einfache Webseite (Web-Interface) zur Steuerung. Es gibt zwei Ansichten:
 
 ### 🔴 Admin-Ansicht
-In der Admin-Ansicht (Zugang über das Passwort) hast du die volle Kontrolle über das gesamte System. Hier kannst du alle Konfigurationen vornehmen, Gongs hochladen oder löschen, WLAN-Netzwerke verwalten, Logs einsehen und Systemupdates durchführen.
+In der passwortgeschützten Admin-Ansicht hast du die volle Kontrolle. Hier konfigurierst du das System, passt Wartezeiten und die Stimme an, verwaltest WLAN-Netzwerke, lädst neue Gongs hoch und machst Systemupdates.
 
 ### 🔵 User-Ansicht (Eingeschränkter Modus)
-Die User-Ansicht ist speziell für den alltäglichen Gebrauch gedacht – idealerweise auf einem PC direkt neben der Funkfixstation oder der Florianstation deiner Feuerwehr.
-Über einen speziellen Direkt-Link (den der Admin im Konfigurations-Tab generieren und kopieren kann) gelangt man sofort in diesen eingeschränkten Modus, ganz ohne Passwort-Eingabe.
-In dieser Ansicht können Benutzer lediglich manuell Durchsagen triggern, die Einsatzhistorie einsehen und Gongs abspielen. Sämtliche kritischen Einstellungen (System, Konfiguration, Löschen von Gongs) sind komplett ausgeblendet und serverseitig gesperrt.
-**Tipp:** Speichere diesen Direkt-Link auf dem PC in der Florianstation einfach als Desktop-Verknüpfung (Shortcut). So können die Kameradinnen und Kameraden das Interface mit nur einem Klick öffnen und Durchsagen machen, ohne etwas verstellen zu können!
+Diese Ansicht ist für den alltäglichen Gebrauch gedacht – ideal für einen Touch-PC direkt neben dem Funk in der Funkfixstation.
+Über einen speziellen Direkt-Link gelangt man sofort in diesen Modus, ganz ohne Passwort. Hier kann man lediglich manuell Durchsagen starten z.B. für Übungen und die Historie einsehen. Alle kritischen Einstellungen sind unsichtbar und gesperrt. So kann nichts versehentlich verstellt werden!
 
 ---
 
 ## 🔌 Voraussetzungen & Hardware
 
-Um das System zuverlässig zu betreiben, wird folgende Grundausstattung benötigt:
+Um das System zuverlässig zu betreiben, wird nur wenig Ausstattung benötigt:
 
-* **Hardware & Betriebssystem:** Ein kleiner Rechner, am besten ein **Raspberry Pi (Linux/Raspberry Pi OS)** oder ein handelsüblicher **Mini-PC mit Windows**. Das gesamte System ist zu 100% plattformunabhängig und läuft nativ auf Linux und Windows.
-* **Audio-Verbindung:** Ein Adapterkabel (meist **AUX auf Cinch**), um den Audioausgang (Kopfhöreranschluss) des Raspberry Pi/PCs direkt mit dem Verstärker bzw. der Lautsprecheranlage des Feuerwehrhauses zu verbinden. *(Alternativ: Falls das Feuerwehrhaus über keine fest verbaute Anlage verfügt, kann auch einfach ein ganz normaler PC-Lautsprecher angeschlossen und z.B. in der Umkleide platziert werden).*
-* **Netzwerk (LAN & WLAN):** Das System unterstützt vollumfänglich sowohl **LAN (Kabel)** als auch **WLAN (Drahtlos)** für Windows und Linux. Direkt auf der Webseite findest du einen eigenen Tab "Internet", in dem du ganz bequem WLAN-Netzwerke in deiner Umgebung suchen, dich mit einem Passwort verbinden oder jederzeit zurück auf LAN wechseln kannst. Für eine ausfallsichere Verbindung im Feuerwehrhaus wird dennoch ein festes LAN-Kabel empfohlen.
-* **FWEI Zugang:** Um die Einsatzdaten der Leitstelle empfangen zu können, wird zwingend ein **Mannschafts- oder Kommando-Login** von der FWEI (FeuerwehrEinsatzInfo) benötigt.
+* **Hardware:** Ein kleiner Rechner, am besten ein **Raspberry Pi (Linux)** oder ein günstiger **Mini-PC mit Windows**. Das System läuft auf beiden Plattformen problemlos.
+* **Audio-Ausgabe (Lautsprecher):** Du bist hier völlig flexibel, wie der Ton im Haus wiedergegeben wird:
+  * **Große Hausanlage:** Über ein Adapterkabel (meist AUX auf Cinch) kannst du den Rechner direkt an die große Lautsprecher- oder ELA-Anlage des Feuerwehrhauses anschließen.
+  * **PC-Lautsprecher:** Keine große Anlage vorhanden? Schließe einfach normale PC-Lautsprecher an und platziere sie gut hörbar in der Umkleide.
+  * **Bluetooth-Lautsprecher:** Die kabellose und modernste Variante! Verbinde deinen Raspberry Pi oder PC einfach per Bluetooth mit einem handelsüblichen Bluetooth-Lautsprecher (z.B. JBL Box, Soundbar). Das erspart lästiges Kabelverlegen und funktioniert hervorragend!
+* **Netzwerk:** Das System unterstützt sowohl **LAN (Kabel)** als auch **WLAN (Drahtlos)**. Für maximale Ausfallsicherheit im Feuerwehrhaus wird ein LAN-Kabel empfohlen, WLAN funktioniert aber ebenso einwandfrei und lässt sich direkt über das Web-Interface einrichten.
+* **FWEI Zugang:** Um die Einsatzdaten der Leitstelle empfangen zu können, wird ein **Mannschafts- oder Kommando-Login** der FWEI (FeuerwehrEinsatzInfo) benötigt. **ZWINGEND mit Benutzername und Passwort.** Login-Token werden nicht unterstützt.
 
 ---
 
@@ -65,79 +68,60 @@ Die absolut einfachste Variante für den Raspberry Pi. Befolge einfach diese sim
 3. **Dateien kopieren:** Wenn der Imager fertig ist, öffnest du die SD-Karte an deinem PC. Lade dir hier aus dem Projekt den Ordner `install_files` herunter und kopiere **beide Dateien** daraus direkt auf das Hauptverzeichnis deiner SD-Karte. **WICHTIG:** Wenn du gefragt wirst, ob Dateien ersetzt werden sollen, musst du das unbedingt mit **Ja (Überschreiben)** bestätigen!
 4. **LAN-Kabel anschließen (ZWINGEND):** Stecke die fertige SD-Karte in deinen Raspberry Pi. Bevor du ihm Strom gibst, **musst** du ihn zwingend per LAN-Kabel an dein Netzwerk anschließen. Über WLAN wird diese erste Installation fehlschlagen!
 5. **Einschalten & Warten:** Schließe den Strom an. Der Raspberry Pi installiert nun alles komplett vollautomatisch im Hintergrund. Je nach deiner Internetverbindung dauert das ca. **20 bis 30 Minuten**. Bitte lass den Pi in dieser Zeit einfach in Ruhe arbeiten und trenne nicht den Strom.
-6. **Fertig:** Danach ist dein System einsatzbereit! Du kannst nun von jedem anderen Gerät (z.B. deinem Handy oder einem anderen PC, das sich im gleichen Netzwerk befindet) über deinen normalen Webbrowser auf das Web-GUI zugreifen. Die Adresse lautet meistens `http://alarmdurchsage.local:8122` (oder du nutzt die IP-Adresse des Pis, die du in deinem Router findest).
+6. **Fertig:** Danach ist dein System einsatzbereit! Du kannst nun von jedem anderen Gerät über deinen normalen Webbrowser auf das Web-GUI zugreifen. Die Adresse lautet meistens `http://alarmdurchsage.local:8122`.
 
 **🔊 Wichtiger Hinweis zur Audioausgabe:** 
-Das System aktiviert und erkennt automatisch alle verfügbaren Audioanschlüsse. Du hast dabei völlige Freiheit, wie du den Ton an die Hausanlage überträgst:
-* **Klassisch (AUX/Kopfhöreranschluss):** Bei den meisten Modellen (wie Pi 3 & 4) einfach das AUX-Kabel einstecken.
-* **HDMI:** Das Audiosignal wird automatisch auch digital über den HDMI-Port ausgegeben (ideal z. B. beim Pi 5, der keinen eigenen AUX-Port hat).
-* **Externe USB-Soundkarte:** Steckst du eine externe Soundkarte per USB an, wird diese sofort erkannt. Du kannst sie dann ganz bequem direkt auf der Webseite im Menü "Einstellungen (Config)" unter "Output Device" (Ausgabegerät) auswählen und direkt nutzen.
+Das System erkennt automatisch alle verfügbaren Audioanschlüsse:
+* **Klassisch (AUX/Kopfhörer):** Einfach das AUX-Kabel einstecken.
+* **Bluetooth:** Verbinde den Pi über das Betriebssystem mit dem Lautsprecher. Das System erkennt den Bluetooth-Lautsprecher sofort als wählbares Ausgabegerät auf der Webseite!
+* **HDMI & USB:** Das Audiosignal kann auch über HDMI oder eine angesteckte USB-Soundkarte ausgegeben werden. Im Einstellungs-Menü der Webseite kannst du das gewünschte Gerät jederzeit auswählen.
 
 ### 2. Manuelle Installation auf Linux / Pi (via Docker)
 
-Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher in einem Container ausgeführt.
+Wenn du bereits ein Linux (z.B. Ubuntu oder Raspberry Pi OS) am Laufen hast, empfehlen wir die Nutzung von **Docker**. Das Programm wird dabei isoliert und sicher ausgeführt.
 
-1. Lade dir **nur** das Installationsskript auf dein Linux-Gerät herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)  
-   *(Oder lade es per Terminal herunter: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
+1. Lade dir das Installationsskript herunter: [👉 install_linux.sh herunterladen](https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh)  
+   *(Oder per Terminal: `curl -O https://raw.githubusercontent.com/Jupiter79/alarm_durchsage/main/install_linux.sh`)*
 2. Führe das Skript im Terminal aus: `bash install_linux.sh`  
-   *(Möchtest du, dass das System sich zusätzlich automatisch um das WLAN kümmert und den NetworkManager installiert, ergänze den Flag: `bash install_linux.sh --install-networkmanager`)*
-3. Das Skript erledigt den Rest: Es lädt den aktuellen Code herunter, baut den Docker-Container und trägt ihn **automatisch in den Autostart** ein. Wenn du den Rechner oder Pi neu startest, fährt das Alarm-System ganz von alleine wieder hoch.
+   *(Für inkludierte WLAN-Verwaltung: `bash install_linux.sh --install-networkmanager`)*
+3. Das Skript lädt den Code, baut den Container und richtet einen **Autostart** ein. Bei einem Neustart fährt das System ganz von alleine wieder hoch.
 
 ### 3. Manuelle Installation auf Windows
 
-Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast, kannst du das System "nativ" installieren:
+Wenn du lieber einen klassischen Windows Mini-PC im Feuerwehrhaus stehen hast:
 
-1. Lade dir **nur** die Installationsdatei herunter: [👉 install_windows.bat herunterladen](https://github.com/Jupiter79/alarm_durchsage/blob/main/install_windows.bat)  
-   *(Dort auf den Download Button klicken)*
-2. Mache einen einfachen Doppelklick auf die heruntergeladene Datei `install_windows.bat`.
-3. Das Skript übernimmt die ganze Arbeit für dich: Es lädt den Code herunter, installiert Python und alle nötigen Hilfsprogramme und erstellt eigenständig eine Verknüpfung im Windows-Autostart. Nach einem PC-Neustart läuft das System unsichtbar im Hintergrund mit.
-
----
-
-## ⚙️ Wie funktioniert das System?
-
-Das Programm läuft als unsichtbarer Dienst dauerhaft im Hintergrund auf einem Rechner (z. B. einem Raspberry Pi oder Mini-PC) im Netzwerk des Feuerwehrhauses. 
-
-* **Dauerhafte Verbindung:** Das System ist rund um die Uhr sicher mit dem Server der Leitstelle verbunden und lauscht auf Alarme für die eigene Feuerwehr.
-* **Intelligente Übersetzung:** Sobald ein Alarm eingeht, bereitet das System den rohen Leitstellentext auf. Abkürzungen (z.B. "T VU" oder "BMA") werden in verständliche Sätze (wie "Technischer Einsatz, Verkehrsunfall" oder "Brandmeldeanlage") übersetzt.
-* **Sprachsynthese:** Der übersetzte Text wird in Echtzeit in eine hochwertige Sprachausgabe (TTS) umgewandelt und an die Hausanlage geschickt.
-
-> **Hinweis zum Datenschutz (TTS):** Zur Generierung der gesprochenen Texte (TTS) wird das Paket `edge_tts` verwendet. Die reinen Textdaten des Einsatzes werden zur Umwandlung kurzzeitig an Microsoft-Server gesendet (Ziel-URL: `wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1`).
+1. Lade dir die Datei herunter: [👉 install_windows.bat herunterladen](https://github.com/Jupiter79/alarm_durchsage/blob/main/install_windows.bat)  
+2. Mache einen Doppelklick auf die Datei `install_windows.bat`.
+3. Das Skript erledigt alles: Es installiert Python, alle Hilfsprogramme und erstellt eine Verknüpfung im Windows-Autostart. Das System läuft danach automatisch unsichtbar im Hintergrund.
 
 ---
 
-## 🔗 Webhook & Wake on LAN (Smart Home & Zusatz-Monitore)
+## ⚙️ Intelligente Textübersetzung
 
-Das System bietet dir die Möglichkeit, bei einem eingehenden Alarm (oder Test-Alarm) externe Systeme anzusteuern:
+Die Computerstimme liest genau das vor, was sie bekommt. Da die Leitstelle oft mit Abkürzungen arbeitet (z.B. "T VU" oder "BMA"), besitzt das System ein anpassbares Wörterbuch. 
+Du kannst auf der Webseite eintragen, dass "T VU" als "Technischer Einsatz, Verkehrsunfall!" und "verm." als "vermutlich" vorgelesen werden soll. So wird aus einem kryptischen Einsatztext eine saubere, verständliche Durchsage.
 
-* **Webhook URL:** Du kannst eine beliebige URL eintragen (z.B. für Home Assistant, ioBroker, Loxone). Sobald ein Alarm eingeht, wird diese URL (per GET-Request) aufgerufen. Damit lässt sich im Feuerwehrhaus beispielsweise automatisch das Licht einschalten oder das Garagentor öffnen.
-* **Wake on LAN (WoL):** Was ist das und was bringt es? Wake on LAN ermöglicht es, netzwerkfähige Geräte (z. B. einen ausgeschalteten PC oder einen Einsatz-Monitor an der Wand) über das Netzwerk aufzuwecken. Trage einfach die MAC-Adresse (z.B. `AA:BB:CC:DD:EE:FF`) des PCs ein. Sobald ein Alarm eintrifft, sendet das System ein "Magic Packet" an das Gerät, wodurch es automatisch hochfährt. Eine genaue Anleitung, wie man PCs für Wake on LAN konfiguriert, findest du z. B. [hier bei Heise.de](https://www.heise.de/tipps-tricks/Wake-on-LAN-Windows-10-PC-aufwecken-so-geht-s-4309650.html). In der Konfiguration kann der UDP-Port (meist 9, seltener 7) ausgewählt werden.
+---
+
+## 🔗 Webhook & Wake on LAN (Smart Home & Einsatz-Monitore)
+
+Das System kann bei einem eingehenden Alarm externe Geräte ansteuern:
+
+* **Webhook URL:** Sobald ein Alarm eingeht, wird eine von dir festgelegte URL aufgerufen. Damit lässt sich z.B. über ein Smart-Home-System (Home Assistant, Loxone) im Feuerwehrhaus automatisch das Licht einschalten oder das Rolltor öffnen.
+* **Wake on LAN (WoL):** Trage die MAC-Adresse (z.B. `AA:BB:CC:DD:EE:FF`) eines Computers ein (z.B. dem Einsatz-Monitor an der Wand). Sobald ein Alarm eintrifft, sendet das System ein Aufweck-Signal ("Magic Packet") an diesen PC, wodurch er automatisch hochfährt. Interessant für den PC in der Funkfixstation oder Einsatzmonitore.
 
 ---
 
 ## 💻 Bedienung & Zugriff (Das Web-Interface)
 
-Das System verfügt über eine grafische Oberfläche (Webseite). Du musst absolut kein Computer-Experte sein, um das System zu bedienen oder Einstellungen zu ändern.
+Du musst kein Netzwerkingenieur sein, um das System zu bedienen!
 
-### 🌐 So greifst du auf das System zu:
+1. Öffne auf einem beliebigen Gerät im Feuerwehr-Netzwerk den Internetbrowser.
+2. Gib folgende Adresse ein: **http://alarmdurchsage.local:8122** (bzw. den gesetzten Hostname bzw. die IP-Adresse)
+3. Das Standard-Passwort für den ersten Login lautet: **`122`**
 
-1. Öffne auf einem beliebigen Gerät (PC, Tablet oder Smartphone), das mit dem **Feuerwehr-Netzwerk (WLAN/LAN)** verbunden ist, einen Internetbrowser (z.B. Chrome, Safari, Edge).
-2. Gib oben in die Adresszeile folgende Adresse ein:  
-   **http://alarmdurchsage.local:8122**  
-   *(Sollte das nicht klappen, kann alternativ die direkte IP-Adresse des Geräts im Netzwerk eingegeben werden).*
-3. Du landest auf der Anmeldeseite. Das Passwort lautet standardmäßig:  
-   **`122`**  
-   *(Das System speichert die Anmeldung, sodass du dich nach einem Neustart nicht immer wieder neu einloggen musst).*
-
-### 🛠️ Was kannst du auf der Webseite machen?
-
-Sobald du eingeloggt bist, hast du Zugriff auf folgende Funktionen:
-
-* **Manuelle Durchsagen (Info-Gong):** Du kannst jederzeit eigene Texte eintippen und sie manuell im Feuerwehrhaus vorlesen lassen.
-* **Test-Einsatz simulieren:** Mit einem Klick kannst du einen kompletten Test-Alarm (inklusive Gong und Wiederholungen) auslösen, um zu prüfen, ob die Lautsprecher und die Sprachausgabe funktionieren.
-* **Historie (Einsatz-Log):** Du kannst genau nachverfolgen, an welchem Datum und zu welcher Uhrzeit welche Alarme oder Durchsagen verarbeitet wurden.
-* **Einstellungen (Config):** Hier können Wartezeiten, die Lautstärke der Stimme und die Zeiten für die Alarm-Wiederholungen konfiguriert werden. Außerdem kannst du hier Wörterbücher pflegen, damit das System neue Leitstellen-Abkürzungen richtig vorliest.
-* **Gongs verwalten:** Hier hast du die Möglichkeit, neue Gong-Töne (als .mp3 Datei) hochzuladen und auszuwählen.
-
----
-*Erstellt für den reibungslosen Ablauf im Einsatzfall.*
+**Funktionen im Überblick:**
+* **Manuelle Durchsagen:** Tippe Texte ein und lass sie vorlesen oder spiele einfach nur einen Gong ab.
+* **Test-Einsatz:** Löse einen vollständigen Probealarm aus, um Lautstärke und Verständlichkeit in Ruhe zu testen.
+* **Historie:** Verfolge alle vergangenen Einsätze und Durchsagen nach.
+* **Einstellungen:** Konfiguriere Wiederholungsintervalle, Lautstärke, Stimme und das Abkürzungs-Wörterbuch bequem über den Browser.
