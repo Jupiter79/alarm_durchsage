@@ -1104,8 +1104,28 @@ def api_get_audio_devices():
 @app.get("/api/syslog", dependencies=[Depends(verify_admin_session)])
 def api_get_syslog():
     try:
-        with open("system.log", "r", encoding="utf-8") as f:
-            return Response(content=f.read(), media_type="text/plain")
+        cwd = os.path.dirname(os.path.abspath(__file__))
+        log_files = [f for f in os.listdir(cwd) if f.startswith("system.log")]
+        log_files_paths = [os.path.join(cwd, f) for f in log_files]
+        # Sortiere nach Änderungsdatum (älteste zuerst)
+        log_files_paths.sort(key=os.path.getmtime)
+        
+        merged_content = []
+        for file_path in log_files_paths:
+            try:
+                with open(file_path, "r", encoding="utf-8") as f:
+                    merged_content.append(f"--- {os.path.basename(file_path)} ---\n")
+                    merged_content.append(f.read())
+                    merged_content.append("\n\n")
+            except Exception:
+                pass
+                
+        final_text = "".join(merged_content)
+        
+        headers = {
+            "Content-Disposition": "attachment; filename=system_logs_merged.log"
+        }
+        return Response(content=final_text, media_type="text/plain", headers=headers)
     except Exception:
         return Response(content="Systemlog leer oder nicht gefunden.", media_type="text/plain")
 
