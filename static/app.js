@@ -651,7 +651,7 @@ function renderConfigEditor() {
     // Repeat Alert
     html += '<div class="config-group"><h5 class="text-primary mb-3">🔁 Alarm Wiederholungen</h5>';
     html += `<div class="form-text mb-2 text-warning fw-bold">Nach wie vielen Minuten soll ein laufender realer Einsatz erneut durchgesagt werden? (Kommagetrennte Zahlen!)</div>`;
-    html += `<div class="form-text mb-2">Beispiel: Wenn hier "1.5, 3, 4.5" steht, wird die Durchsage nach 1,5 Minuten, dann nochmal nach 3 Minuten und nochmal nach 4,5 Minuten wiederholt!<br>Hat den Sinn, da nicht alle Kameraden bei der Alarmierung im Feuerwehrhaus sind sondern erst nach und nach einrücken.</div>`;
+    html += `<div class="form-text mb-2">Beispiel: Wenn hier "1.5, 3, 4.5" steht, wird die Durchsage nach 1,5 Minuten, dann nochmal nach 3 Minuten und nochmal nach 4,5 Minuten wiederholt!<br>Hat den Sinn, da nicht alle Kameraden bei der Alarmierung im Feuerwehrhaus sind sondern erst nach und nach einrücken.<br><b>Wenn keine Wiederholungen gewünscht sind, lasse dieses Feld einfach komplett leer!</b></div>`;
     html += `<input type="text" class="form-control" data-path="repeatAlert" value="${currentConfig.repeatAlert.join(', ')}">`;
     html += '</div>';
 
@@ -721,7 +721,7 @@ async function saveConfig() {
         if (el.type === 'number') val = Number(val);
 
         if (path === 'repeatAlert') {
-            val = val.split(',').map(s => Number(s.trim())).filter(n => !isNaN(n));
+            val = val.split(',').filter(s => s.trim() !== '').map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
         }
 
         if (path === 'ui.password' || path === 'credentials.password') {

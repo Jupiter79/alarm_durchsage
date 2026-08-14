@@ -704,11 +704,12 @@ def process_alarm_logic(data_dict: dict):
             for minuten in repeats:
                 try:
                     delay_sec = float(minuten) * 60
-                    t = threading.Timer(delay_sec, execute_repeated_announcement, args=(einsatz_id,))
-                    t.daemon = True
-                    with timers_lock:
-                        active_timers.append(t)
-                    t.start()
+                    if delay_sec > 0:
+                        t = threading.Timer(delay_sec, execute_repeated_announcement, args=(einsatz_id,))
+                        t.daemon = True
+                        with timers_lock:
+                            active_timers.append(t)
+                        t.start()
                 except ValueError: pass
 
     return {"status": "Processed", "gong": gong_id, "text": text}
