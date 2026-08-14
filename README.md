@@ -1,4 +1,4 @@
-# 🚒 Feuerwehr Alarm Durchsage Server
+# 🚒 Feuerwehr Alarmdurchsage Server
 
 Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfachen Worten, was dieses System macht, wie es dir und deiner Feuerwehr im Einsatzfall hilft und wie man es bedient.
 
