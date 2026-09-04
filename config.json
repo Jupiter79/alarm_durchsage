@@ -76,7 +76,8 @@
             "GH": "Gasthaus",
             "KH": "Krankenhaus",
             "kg": "Kilogramm",
-            "TP": "Treffpunkt"
+            "TP": "Treffpunkt",
+            "RH": "Rüsthaus"
         },
         "keyword_mapping": {
             "BMA": "Brandmeldealarm",
