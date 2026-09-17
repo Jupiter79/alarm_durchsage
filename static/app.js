@@ -645,7 +645,19 @@ function renderConfigEditor() {
     html += createSelect('Audio Ausgabe-Gerät', 'audio.output_device', currentConfig.audio.output_device || '', availableAudioDevices, 'Wähle den System-Lautsprecherausgang. Empfehlung: Am Raspberry Pi den nativen Aux-Ausgang (oft "bcm2835 ALSA" oder "Headphones") verwenden. Je nach Anlage wird hierfür oft ein "AUX auf Cinch" Kabeladapter benötigt. ACHTUNG: Bei Änderung muss das Programm neu gestartet werden!');
     html += '<button type="button" class="btn btn-outline-danger px-4" onclick="triggerTestAlarm()" title="Löst einen Einsatz inklusive geplanten Wiederholungen aus"><i class="fa-solid fa-bell me-2"></i>Test-Einsatz simulieren</button>';
     html += '<div class="text-muted small mt-2">Hinweis: Der Alarm startet nach dem Klick zufällig innerhalb der nächsten 15 bis 30 Sekunden, um einen echten Einsatzaufbau zu simulieren.</div>';
-    html += '<div class="alert alert-secondary mt-3 mb-0 border-0" style="font-size: 0.85rem;"><i class="fa-solid fa-circle-info me-2"></i><strong>Hinweis zum Datenschutz (TTS):</strong> Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>edge_tts</code> verwendet. Die Textdaten werden zur Umwandlung an Microsoft-Server gesendet (genaue Ziel-URL: <code>wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1</code>).</div>';
+    html += '<div class="alert alert-secondary mt-3 mb-0 border-0" style="font-size: 0.85rem;">' +
+  '<i class="fa-solid fa-circle-info me-2"></i>' +
+  '<strong>Hinweis zum Datenschutz (TTS):</strong> ' +
+  'Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>edge_tts</code> verwendet. ' +
+  'Die Textdaten werden zur Echtzeit-Umwandlung verschlüsselt an Server von Microsoft gesendet ' +
+  '(Ziel-URL: <code>wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1</code>). ' +
+  'Laut Microsoft-Dokumentation zu den genutzten Prebuilt Neural Voices werden weder eingegebener Text noch generiertes Audio ' +
+  'dauerhaft in Microsoft-Logs gespeichert ' +
+  '(Details: <a href="https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/speech-service/text-to-speech/data-privacy-security#how-do-text-to-speech-services-process-data" target="_blank" rel="noopener noreferrer" class="alert-link">Microsoft Speech Data Privacy</a>). ' +
+  'Weitere Informationen zur Datenverarbeitung des Dienstes finden sich im ' +
+  '<a href="https://learn.microsoft.com/en-us/legal/microsoft-edge/privacy#read-aloud" target="_blank" rel="noopener noreferrer" class="alert-link">Edge Privacy Whitepaper (Read Aloud)</a> sowie in der ' +
+  '<a href="https://privacy.microsoft.com/de-de/privacystatement#mainpersonaldataweprocessmodule" target="_blank" rel="noopener noreferrer" class="alert-link">Microsoft-Datenschutzerklärung</a>.' +
+'</div>';
     html += '</div>';
 
     // Repeat Alert
