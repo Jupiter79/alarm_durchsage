@@ -347,7 +347,7 @@ function switchTab(tabId) {
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
     document.getElementById(`tab-${tabId}`).style.display = 'block';
-    const targetLink = Array.from(document.querySelectorAll('.nav-link')).find(l => l.innerText.toLowerCase().includes(tabId.toLowerCase()));
+    const targetLink = Array.from(document.querySelectorAll('.nav-link')).find(l => l.getAttribute('onclick') && l.getAttribute('onclick').includes(`switchTab('${tabId}')`));
     if (targetLink) targetLink.classList.add('active');
 
     if (tabId === 'config') loadConfig();
