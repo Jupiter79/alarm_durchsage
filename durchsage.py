@@ -693,8 +693,8 @@ def get_test_alarm_payload(mission_id: str) -> dict:
     return {
         "id": mission_id,
         "type": "T SONDERLAGE,\nTest Einsatz",
-        "additionalAddressInfo": "Burgplatz 1! Spittal an der Drau",
-        "placeLAWZ": "Spittal an der Drau",
+        "additionalAddressInfo": "Burgplatz 1! Musterstadt",
+        "placeLAWZ": "Musterstadt",
         "description": "Test der Alarmdurchsage.",
         "is_test": True
     }
