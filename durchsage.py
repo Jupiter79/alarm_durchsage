@@ -424,6 +424,17 @@ def normalize_text(text: str) -> str:
 
 def format_stichwort(original: str) -> str:
     if not original: return ""
+    
+    # Fix für "VU", da Piper es als "Wu" ausspricht. Ersetzt es durch "Fau U"
+    # Das Stichwort ist der Teil vor dem Komma (z.B. "T VU 3, ...")
+    parts = original.split(",", 1)
+    if parts:
+        stichwort_words = parts[0].strip().split()
+        if len(stichwort_words) >= 2 and stichwort_words[1].upper() == "VU":
+            stichwort_words[1] = "Fau U"
+            parts[0] = " ".join(stichwort_words)
+            original = ", ".join(parts)
+            
     o = " ".join(original.split())
     u = o.upper()
     
@@ -449,10 +460,6 @@ def format_stichwort(original: str) -> str:
 
 def create_announcement_text(data: dict) -> str:
     stichwort = format_stichwort(data.get("type", ""))
-    
-    # Spezifischer Fix für das Stichwort "VU", da Piper es sonst als "Fu" oder "Wu" ausspricht.
-    if stichwort:
-        stichwort = re.sub(r'\bVU\b', 'Fau U', stichwort)
     
     adresse_raw = data.get("additionalAddressInfo", "")
     desc = normalize_text(data.get("description", ""))
