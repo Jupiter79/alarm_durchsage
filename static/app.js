@@ -1,4 +1,6 @@
+let currentSessionToken = null;
 let currentConfig = null;
+let originalVoice = null;
 
 // --- Initialization & Auth ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -496,6 +498,7 @@ async function loadConfig() {
         const res = await fetch('/api/config');
         if (res.ok) {
             currentConfig = await res.json();
+            originalVoice = currentConfig.audio ? currentConfig.audio.voice : null;
 
             try {
                 const devRes = await fetch('/api/audio_devices');
@@ -638,7 +641,41 @@ function renderConfigEditor() {
 
     // Audio
     html += '<div class="config-group"><h5 class="text-primary mb-3">🔊 Audio & Sprachausgabe</h5>';
-    html += createInput('Microsoft TTS Stimme', 'audio.voice', currentConfig.audio.voice, 'text', 'Der Name der Computerstimme. Standardmäßig "de-DE-KillianNeural" (eine sehr deutliche, deutsche männliche Stimme). <a href="https://learn.microsoft.com/de-de/azure/ai-services/speech-service/language-support?tabs=tts" target="_blank" class="ms-1 fw-bold text-decoration-none"><i class="fa-solid fa-link me-1"></i>Liste aller Stimmen ansehen</a>');
+
+    const voices = [
+        { val: "de_DE-thorsten-medium", label: "Thorsten (Männlich, Standard, Empfohlen)" },
+        { val: "de_DE-thorsten-high", label: "Thorsten (Männlich, Höchste Qualität, langsamer)" },
+        { val: "de_DE-thorsten-low", label: "Thorsten (Männlich, Schnell)" },
+        { val: "de_DE-kerstin-low", label: "Kerstin (Weiblich, Schnell)" },
+        { val: "de_DE-pavoque-low", label: "Pavoque (Männlich, Schnell)" },
+        { val: "de_DE-ramona-low", label: "Ramona (Weiblich, Schnell)" },
+        { val: "de_DE-karlsson-low", label: "Karlsson (Männlich, Schnell)" },
+        { val: "de_DE-eva_k-x_low", label: "Eva K (Weiblich, Sehr Schnell)" }
+    ];
+    let voiceOptionsHtml = '';
+    let voiceFound = false;
+    voices.forEach(v => {
+        if (v.val === currentConfig.audio.voice) voiceFound = true;
+        voiceOptionsHtml += `<option value="${v.val}" ${v.val === currentConfig.audio.voice ? 'selected' : ''}>${v.label}</option>`;
+    });
+    if (!voiceFound && currentConfig.audio.voice) {
+        voiceOptionsHtml += `<option value="${currentConfig.audio.voice}" selected>${currentConfig.audio.voice} (Alte Konfiguration)</option>`;
+    }
+
+    html += `
+        <div class="mb-3">
+            <label class="form-label fw-bold">Offline TTS Stimme (Piper)</label>
+            <select class="form-select" data-path="audio.voice">
+                ${voiceOptionsHtml}
+            </select>
+            <div class="form-text">Wähle die Stimme für die Offline-Sprachausgabe aus. Beim Speichern wird das ca. 60MB große Sprachmodell automatisch im Hintergrund heruntergeladen!</div>
+            <div class="form-text mt-2">
+                <i class="fa-solid fa-circle-info text-primary"></i> <b>Hinweis zur Qualität:</b> 
+                "Schnell" (Low) bzw. "Langsam" (High) im Namen der Stimme bezieht sich <b>nicht</b> auf die Sprechgeschwindigkeit, sondern auf die Audio-Qualität und Rechenzeit. 
+                "High"-Modelle klingen am natürlichsten, brauchen aber länger zum Generieren der Audiodatei. Für schwache Hardware (z.B. Raspberry Pi) werden "Low"-Modelle empfohlen.
+            </div>
+        </div>
+    `;
     html += createInput('Sprech-Geschwindigkeit', 'audio.rate', currentConfig.audio.rate, 'text', 'Wie schnell soll gesprochen werden? Verwende Prozentwerte mit Plus/Minus. Z.B. "-10%" bedeutet 10% langsamer als normal (besser verständlich). "+10%" wäre schneller.');
     html += createInput('Lautstärkeanhebung (dB)', 'audio.gain_db', currentConfig.audio.gain_db, 'number', 'Um wie viel Dezibel (dB) soll die berechnete Sprachausgabe lauter gemacht werden? "9" bedeutet deutlich lauter. Wenn es übersteuert (krächzt), setze den Wert tiefer (z.B. 4).');
     html += createInput('Pause nach Gong (Sekunden)', 'audio.gong_pause_sec', currentConfig.audio.gong_pause_sec, 'number', 'Wie viele Sekunden Stille sollen zwischen dem Ende des Gongs und dem Start der Sprachansage vergehen? (Empfohlen: 1 oder 1.5)');
@@ -646,18 +683,11 @@ function renderConfigEditor() {
     html += '<button type="button" class="btn btn-outline-danger px-4" onclick="triggerTestAlarm()" title="Löst einen Einsatz inklusive geplanten Wiederholungen aus"><i class="fa-solid fa-bell me-2"></i>Test-Einsatz simulieren</button>';
     html += '<div class="text-muted small mt-2">Hinweis: Der Alarm startet nach dem Klick zufällig innerhalb der nächsten 15 bis 30 Sekunden, um einen echten Einsatzaufbau zu simulieren.</div>';
     html += '<div class="alert alert-secondary mt-3 mb-0 border-0" style="font-size: 0.85rem;">' +
-  '<i class="fa-solid fa-circle-info me-2"></i>' +
-  '<strong>Hinweis zum Datenschutz (TTS):</strong> ' +
-  'Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>edge_tts</code> verwendet. ' +
-  'Die Textdaten werden zur Echtzeit-Umwandlung verschlüsselt an Server von Microsoft gesendet ' +
-  '(Ziel-URL: <code>wss://speech.platform.bing.com/consumer/speech/synthesize/readaloud/edge/v1</code>). ' +
-  'Laut Microsoft-Dokumentation zu den genutzten Prebuilt Neural Voices werden weder eingegebener Text noch generiertes Audio ' +
-  'dauerhaft in Microsoft-Logs gespeichert ' +
-  '(Details: <a href="https://learn.microsoft.com/en-us/azure/foundry/responsible-ai/speech-service/text-to-speech/data-privacy-security#how-do-text-to-speech-services-process-data" target="_blank" rel="noopener noreferrer" class="alert-link">Microsoft Speech Data Privacy</a>). ' +
-  'Weitere Informationen zur Datenverarbeitung des Dienstes finden sich im ' +
-  '<a href="https://learn.microsoft.com/en-us/legal/microsoft-edge/privacy#read-aloud" target="_blank" rel="noopener noreferrer" class="alert-link">Edge Privacy Whitepaper (Read Aloud)</a> sowie in der ' +
-  '<a href="https://privacy.microsoft.com/de-de/privacystatement#mainpersonaldataweprocessmodule" target="_blank" rel="noopener noreferrer" class="alert-link">Microsoft-Datenschutzerklärung</a>.' +
-'</div>';
+        '<i class="fa-solid fa-shield-halved me-2"></i>' +
+        '<strong>Hinweis zum Datenschutz (TTS):</strong> ' +
+        'Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>piper-tts</code> verwendet. ' +
+        'Die Audio-Generierung erfolgt vollständig <strong>lokal und offline</strong>. Es werden keine Audiodaten oder Texte in die Cloud gesendet.' +
+        '</div>';
     html += '</div>';
 
     // Repeat Alert
@@ -757,22 +787,48 @@ async function saveConfig() {
         currentConfig.text_processing[dictName] = newDict;
     });
 
+    let toast = document.getElementById("dl-toast");
+    const voiceChanged = originalVoice && currentConfig.audio && (originalVoice !== currentConfig.audio.voice);
+
+    if (voiceChanged) {
+        if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "dl-toast";
+            toast.style.position = "fixed";
+            toast.style.bottom = "20px";
+            toast.style.right = "20px";
+            toast.style.backgroundColor = "#0d6efd";
+            toast.style.color = "white";
+            toast.style.padding = "15px 20px";
+            toast.style.borderRadius = "8px";
+            toast.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+            toast.style.zIndex = "9999";
+            toast.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Konfiguration wird gespeichert... (Modell-Download kann einige Sekunden dauern)';
+            document.body.appendChild(toast);
+        }
+        toast.style.display = "block";
+    }
+
     try {
         const res = await fetch('/api/config', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentConfig)
         });
+        if (toast) toast.style.display = "none";
         if (res.ok) {
+            originalVoice = currentConfig.audio ? currentConfig.audio.voice : null;
             // alert('Konfiguration gespeichert!'); // Remove alert if we are going to restart anyway, or keep it? The alert might block the restart. Let's keep it but they have to click ok. Actually, let's keep it.
             alert('Konfiguration gespeichert!');
             return true;
         }
         else {
-            alert('Fehler beim Speichern.');
+            const errData = await res.json();
+            alert('Fehler beim Speichern: ' + (errData.detail || 'Unbekannter Fehler'));
             return false;
         }
     } catch (e) {
+        if (toast) toast.style.display = "none";
         alert('Netzwerkfehler.');
         return false;
     }
@@ -786,7 +842,8 @@ async function saveConfigAndRestart() {
 }
 
 async function testConnection() {
-    await saveConfig();
+    const success = await saveConfig();
+    if (!success) return;
     try {
         const res = await fetch('/api/reconnect', { method: 'POST' });
         if (res.ok) {
@@ -1008,7 +1065,7 @@ async function restartSystem() {
         try {
             const res = await fetch('/api/restart', { method: 'POST' });
             if (res.ok) {
-                alert("System startet neu! Bitte die Seite in ca. 5 Sekunden manuell neu laden.");
+                alert("System startet neu! Seite lädt gleich automatisch neu!");
             } else {
                 alert("Fehler beim Neustart.");
             }

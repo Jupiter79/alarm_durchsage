@@ -1,3 +1,10 @@
 log.json
 __pycache__/
 *.pyc
+test_*.py
+test_*.wav
+install.log
+*.onnx
+*.onnx.json
+install_windows_dev.bat
+system.log
