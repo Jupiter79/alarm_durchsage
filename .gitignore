@@ -7,5 +7,4 @@ install.log
 *.onnx
 *.onnx.json
 install_windows_dev.bat
-test.wav
 system.log

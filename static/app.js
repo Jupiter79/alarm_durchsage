@@ -1,4 +1,6 @@
+let currentSessionToken = null;
 let currentConfig = null;
+let originalVoice = null;
 
 // --- Initialization & Auth ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -496,6 +498,7 @@ async function loadConfig() {
         const res = await fetch('/api/config');
         if (res.ok) {
             currentConfig = await res.json();
+            originalVoice = currentConfig.audio ? currentConfig.audio.voice : null;
 
             try {
                 const devRes = await fetch('/api/audio_devices');
@@ -783,22 +786,26 @@ async function saveConfig() {
     });
 
     let toast = document.getElementById("dl-toast");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "dl-toast";
-        toast.style.position = "fixed";
-        toast.style.bottom = "20px";
-        toast.style.right = "20px";
-        toast.style.backgroundColor = "#0d6efd";
-        toast.style.color = "white";
-        toast.style.padding = "15px 20px";
-        toast.style.borderRadius = "8px";
-        toast.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-        toast.style.zIndex = "9999";
-        toast.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Konfiguration wird gespeichert... (Modell-Download kann einige Sekunden dauern)';
-        document.body.appendChild(toast);
+    const voiceChanged = originalVoice && currentConfig.audio && (originalVoice !== currentConfig.audio.voice);
+
+    if (voiceChanged) {
+        if (!toast) {
+            toast = document.createElement("div");
+            toast.id = "dl-toast";
+            toast.style.position = "fixed";
+            toast.style.bottom = "20px";
+            toast.style.right = "20px";
+            toast.style.backgroundColor = "#0d6efd";
+            toast.style.color = "white";
+            toast.style.padding = "15px 20px";
+            toast.style.borderRadius = "8px";
+            toast.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
+            toast.style.zIndex = "9999";
+            toast.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Konfiguration wird gespeichert... (Modell-Download kann einige Sekunden dauern)';
+            document.body.appendChild(toast);
+        }
+        toast.style.display = "block";
     }
-    toast.style.display = "block";
 
     try {
         const res = await fetch('/api/config', {
@@ -806,8 +813,9 @@ async function saveConfig() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(currentConfig)
         });
-        toast.style.display = "none";
+        if (toast) toast.style.display = "none";
         if (res.ok) {
+            originalVoice = currentConfig.audio ? currentConfig.audio.voice : null;
             // alert('Konfiguration gespeichert!'); // Remove alert if we are going to restart anyway, or keep it? The alert might block the restart. Let's keep it but they have to click ok. Actually, let's keep it.
             alert('Konfiguration gespeichert!');
             return true;
@@ -818,7 +826,7 @@ async function saveConfig() {
             return false;
         }
     } catch (e) {
-        toast.style.display = "none";
+        if (toast) toast.style.display = "none";
         alert('Netzwerkfehler.');
         return false;
     }
