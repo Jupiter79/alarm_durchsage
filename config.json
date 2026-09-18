@@ -25,7 +25,7 @@
     "audio": {
         "voice": "de_DE-thorsten-medium",
         "gain_db": 9,
-        "rate": "-10%",
+        "rate": "-30%",
         "gong_pause_sec": 1,
         "output_device": ""
     },

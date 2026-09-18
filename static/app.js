@@ -641,14 +641,16 @@ function renderConfigEditor() {
 
     // Audio
     html += '<div class="config-group"><h5 class="text-primary mb-3">🔊 Audio & Sprachausgabe</h5>';
-    
+
     const voices = [
-        {val: "de_DE-thorsten-medium", label: "Thorsten (Männlich, Standard, Empfohlen)"},
-        {val: "de_DE-thorsten-high", label: "Thorsten (Männlich, Höchste Qualität, langsamer)"},
-        {val: "de_DE-thorsten-low", label: "Thorsten (Männlich, Schnell)"},
-        {val: "de_DE-thorsten_emotional-medium", label: "Thorsten Emotional (Männlich)"},
-        {val: "de_DE-kerstin-low", label: "Kerstin (Weiblich, Schnell)"},
-        {val: "de_DE-pavoque-low", label: "Pavoque (Männlich, Schnell)"}
+        { val: "de_DE-thorsten-medium", label: "Thorsten (Männlich, Standard, Empfohlen)" },
+        { val: "de_DE-thorsten-high", label: "Thorsten (Männlich, Höchste Qualität, langsamer)" },
+        { val: "de_DE-thorsten-low", label: "Thorsten (Männlich, Schnell)" },
+        { val: "de_DE-kerstin-low", label: "Kerstin (Weiblich, Schnell)" },
+        { val: "de_DE-pavoque-low", label: "Pavoque (Männlich, Schnell)" },
+        { val: "de_DE-ramona-low", label: "Ramona (Weiblich, Schnell)" },
+        { val: "de_DE-karlsson-low", label: "Karlsson (Männlich, Schnell)" },
+        { val: "de_DE-eva_k-x_low", label: "Eva K (Weiblich, Sehr Schnell)" }
     ];
     let voiceOptionsHtml = '';
     let voiceFound = false;
@@ -657,7 +659,7 @@ function renderConfigEditor() {
         voiceOptionsHtml += `<option value="${v.val}" ${v.val === currentConfig.audio.voice ? 'selected' : ''}>${v.label}</option>`;
     });
     if (!voiceFound && currentConfig.audio.voice) {
-         voiceOptionsHtml += `<option value="${currentConfig.audio.voice}" selected>${currentConfig.audio.voice} (Alte Konfiguration)</option>`;
+        voiceOptionsHtml += `<option value="${currentConfig.audio.voice}" selected>${currentConfig.audio.voice} (Alte Konfiguration)</option>`;
     }
 
     html += `
@@ -666,7 +668,7 @@ function renderConfigEditor() {
             <select class="form-select" data-path="audio.voice">
                 ${voiceOptionsHtml}
             </select>
-            <div class="form-text">Wähle die Stimme für die Offline-Sprachausgabe aus. Beim Speichern wird das ca. 60MB große Sprachmodell automatisch im Hintergrund heruntergeladen! (Kurze Internetverbindung erforderlich)</div>
+            <div class="form-text">Wähle die Stimme für die Offline-Sprachausgabe aus. Beim Speichern wird das ca. 60MB große Sprachmodell automatisch im Hintergrund heruntergeladen!</div>
             <div class="form-text mt-2">
                 <i class="fa-solid fa-circle-info text-primary"></i> <b>Hinweis zur Qualität:</b> 
                 "Schnell" (Low) bzw. "Langsam" (High) im Namen der Stimme bezieht sich <b>nicht</b> auf die Sprechgeschwindigkeit, sondern auf die Audio-Qualität und Rechenzeit. 
@@ -681,11 +683,11 @@ function renderConfigEditor() {
     html += '<button type="button" class="btn btn-outline-danger px-4" onclick="triggerTestAlarm()" title="Löst einen Einsatz inklusive geplanten Wiederholungen aus"><i class="fa-solid fa-bell me-2"></i>Test-Einsatz simulieren</button>';
     html += '<div class="text-muted small mt-2">Hinweis: Der Alarm startet nach dem Klick zufällig innerhalb der nächsten 15 bis 30 Sekunden, um einen echten Einsatzaufbau zu simulieren.</div>';
     html += '<div class="alert alert-secondary mt-3 mb-0 border-0" style="font-size: 0.85rem;">' +
-  '<i class="fa-solid fa-shield-halved me-2"></i>' +
-  '<strong>Hinweis zum Datenschutz (TTS):</strong> ' +
-  'Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>piper-tts</code> verwendet. ' +
-  'Die Audio-Generierung erfolgt vollständig <strong>lokal und offline</strong>. Es werden keine Audiodaten oder Texte in die Cloud gesendet.' +
-'</div>';
+        '<i class="fa-solid fa-shield-halved me-2"></i>' +
+        '<strong>Hinweis zum Datenschutz (TTS):</strong> ' +
+        'Zur Generierung der gesprochenen Texte (TTS) wird das Paket <code>piper-tts</code> verwendet. ' +
+        'Die Audio-Generierung erfolgt vollständig <strong>lokal und offline</strong>. Es werden keine Audiodaten oder Texte in die Cloud gesendet.' +
+        '</div>';
     html += '</div>';
 
     // Repeat Alert
@@ -1063,7 +1065,7 @@ async function restartSystem() {
         try {
             const res = await fetch('/api/restart', { method: 'POST' });
             if (res.ok) {
-                alert("System startet neu! Bitte die Seite in ca. 5 Sekunden manuell neu laden.");
+                alert("System startet neu! Seite lädt gleich automatisch neu!");
             } else {
                 alert("Fehler beim Neustart.");
             }
