@@ -450,11 +450,11 @@ def format_stichwort(original: str) -> str:
 def create_announcement_text(data: dict) -> str:
     stichwort = format_stichwort(data.get("type", ""))
     
-    # Spezifischer Fix für das Stichwort "VU", da Piper es sonst als "Fu" ausspricht.
+    # Spezifischer Fix für das Stichwort "VU", da Piper es sonst als "Fu" oder "Wu" ausspricht.
     if stichwort:
         stichwort_parts = stichwort.split()
         if len(stichwort_parts) >= 2 and stichwort_parts[1] == "VU":
-            stichwort_parts[1] = "V-U"
+            stichwort_parts[1] = "Fau U"
             stichwort = " ".join(stichwort_parts)
     
     adresse_raw = data.get("additionalAddressInfo", "")
