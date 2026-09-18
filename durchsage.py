@@ -23,6 +23,7 @@ import socketio
 import urllib.request
 import wave
 from piper.voice import PiperVoice
+from piper.config import SynthesisConfig
 import uvicorn
 from pydub import AudioSegment
 import pygame
@@ -47,7 +48,7 @@ def load_config():
             "ui": {"port": 8122, "password": "122", "user_hash": "", "password_changed": False, "alarm_mode": "full"},
             "credentials": {"base_url": "https://feuerwehr.einsatz.or.at", "username": "", "password": ""},
             "connection": {"reconnect_hours": 19},
-            "audio": {"voice": "de-DE-KillianNeural", "gain_db": 9, "rate": "-10%", "gong_pause_sec": 1, "output_device": ""},
+            "audio": {"voice": "de_DE-thorsten-medium", "gain_db": 9, "rate": "-10%", "gong_pause_sec": 1, "output_device": ""},
             "logging": {"file": "log.json", "retention_days": 365},
             "gongs": [
                 {"id": 1, "name": "Einsatz", "is_alarm": True},
@@ -83,6 +84,14 @@ def load_config():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         c = json.load(f)
         
+    config_changed = False
+    
+    voice = c.get("audio", {}).get("voice", "")
+    if "KillianNeural" in voice or "KatjaNeural" in voice or not voice.startswith("de_DE-"):
+        if "audio" not in c: c["audio"] = {}
+        c["audio"]["voice"] = "de_DE-thorsten-medium"
+        config_changed = True
+        
     if "version" not in c:
         try:
             cwd = os.path.dirname(os.path.abspath(__file__))
@@ -90,7 +99,9 @@ def load_config():
             c["version"] = tag if tag else "v1.0.0"
         except Exception:
             c["version"] = "v1.0.0"
+        config_changed = True
             
+    if config_changed:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(c, f, indent=4, ensure_ascii=False)
             
@@ -461,35 +472,52 @@ def create_announcement_text(data: dict) -> str:
 
     return " ".join(parts)
 
-def ensure_tts_model():
-    model_name = "de_DE-thorsten-medium.onnx"
+def ensure_tts_model(voice_setting=None):
+    if not voice_setting:
+        cfg_live = load_config()
+        voice_setting = cfg_live.get("audio", {}).get("voice", "de_DE-thorsten-medium")
+        
+    model_name = voice_setting + ".onnx" if not voice_setting.endswith(".onnx") else voice_setting
     json_name = model_name + ".json"
     
     # Pruefen ob die endgueltigen Dateien schon da sind
     if os.path.exists(model_name) and os.path.exists(json_name):
-        return
+        return True
         
     if os.path.exists(model_name + ".tmp"):
         logger.info("Download läuft bereits in einem anderen Thread. Warte...")
         for _ in range(120):
             time.sleep(1)
             if os.path.exists(model_name) and os.path.exists(json_name):
-                return
+                return True
 
+    # Parse voice id and quality
+    base_name = model_name.replace(".onnx", "")
+    parts = base_name.split("-")
+    if len(parts) >= 3:
+        voice_id = parts[1]
+        quality = parts[2]
+    else:
+        voice_id = "thorsten"
+        quality = "medium"
         
     logger.info(f"Downloading Piper TTS model {model_name}... Bitte warten.")
     try:
         # Lade in temporaere Dateien herunter
-        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/{model_name}", model_name + ".tmp")
-        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/{json_name}", json_name + ".tmp")
+        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/{voice_id}/{quality}/{model_name}", model_name + ".tmp")
+        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/{voice_id}/{quality}/{json_name}", json_name + ".tmp")
         
         # Umbenennen nach erfolgreichem Download (verhindert korrupte Modelle bei parallelem Zugriff)
         os.rename(model_name + ".tmp", model_name)
         os.rename(json_name + ".tmp", json_name)
         
         logger.info("Download abgeschlossen.")
+        return True
     except Exception as e:
         logger.error(f"Fehler beim Herunterladen des Sprachmodells: {e}")
+        if os.path.exists(model_name + ".tmp"): os.remove(model_name + ".tmp")
+        if os.path.exists(json_name + ".tmp"): os.remove(json_name + ".tmp")
+        return False
 
 async def generate_tts(text, filename):
     if not text or not text.strip(): return None
@@ -502,16 +530,31 @@ async def generate_tts(text, filename):
     cfg_live = load_config()
     try:
         ensure_tts_model()
-        model_name = "de_DE-thorsten-medium.onnx"
+        
+        voice_setting = cfg_live.get("audio", {}).get("voice", "de_DE-thorsten-medium")
+        model_name = voice_setting + ".onnx" if not voice_setting.endswith(".onnx") else voice_setting
+
+        # Sprechgeschwindigkeit berechnen (-10% bedeutet 10% langsamer)
+        rate_str = cfg_live.get("audio", {}).get("rate", "0%")
+        rate_val = 0
+        if isinstance(rate_str, str) and "%" in rate_str:
+            try:
+                rate_val = int(rate_str.replace("%", "").replace("+", "").strip())
+            except:
+                pass
+                
+        # speed_factor: 1.0 = normal, 0.9 = 10% langsamer, 1.1 = 10% schneller
+        # Piper verwendet length_scale: > 1.0 = langsamer
+        speed_factor = 1.0 + (rate_val / 100.0)
+        if speed_factor <= 0.1: speed_factor = 0.1
+        length_scale = 1.0 / speed_factor
+        syn_config = SynthesisConfig(length_scale=length_scale)
 
         temp_wav = "tts_temp.wav"
         voice = PiperVoice.load(model_name)
         
         with wave.open(temp_wav, "wb") as wav_file:
-            wav_file.setnchannels(1)
-            wav_file.setsampwidth(2)
-            wav_file.setframerate(voice.config.sample_rate)
-            voice.synthesize(text, wav_file)
+            voice.synthesize_wav(text, wav_file, syn_config=syn_config)
             
         if os.path.exists(temp_wav):
             try:
@@ -1019,9 +1062,17 @@ def api_save_config(new_config: dict = Body(...)):
     # Neues Passwort wird nicht via config update gespeichert, sondern nur über change_password
     if "password" in new_config.get("ui", {}):
         new_config["ui"]["password"] = cfg_live["ui"]["password"]
+        
+    old_voice = cfg_live.get("audio", {}).get("voice", "")
+    new_voice = new_config.get("audio", {}).get("voice", "")
     
+    if old_voice != new_voice:
+        logger.info(f"Stimme wurde von '{old_voice}' auf '{new_voice}' geändert. Überprüfe Download...")
+        success = ensure_tts_model(voice_setting=new_voice)
+        if not success:
+            raise HTTPException(status_code=400, detail="Das ausgewählte Sprachmodell konnte nicht heruntergeladen werden. Bitte Internetverbindung prüfen oder gültige Stimme wählen.")
+            
     save_config(new_config)
-    # Globale config aktualisieren, falls benötigt. Meistens laden wir sie on-the-fly.
     return {"status": "ok"}
 
 @app.get("/api/history", dependencies=[Depends(verify_session)])

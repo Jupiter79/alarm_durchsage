@@ -23,7 +23,7 @@
         "reconnect_hours": 19
     },
     "audio": {
-        "voice": "de-DE-KillianNeural",
+        "voice": "de_DE-thorsten-medium",
         "gain_db": 9,
         "rate": "-10%",
         "gong_pause_sec": 1,
