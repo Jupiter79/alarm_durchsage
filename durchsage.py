@@ -20,8 +20,9 @@ import platform
 
 import requests
 import socketio
-import edge_tts
-import edge_tts.exceptions
+import urllib.request
+import wave
+from piper.voice import PiperVoice
 import uvicorn
 from pydub import AudioSegment
 import pygame
@@ -460,6 +461,36 @@ def create_announcement_text(data: dict) -> str:
 
     return " ".join(parts)
 
+def ensure_tts_model():
+    model_name = "de_DE-thorsten-medium.onnx"
+    json_name = model_name + ".json"
+    
+    # Pruefen ob die endgueltigen Dateien schon da sind
+    if os.path.exists(model_name) and os.path.exists(json_name):
+        return
+        
+    if os.path.exists(model_name + ".tmp"):
+        logger.info("Download läuft bereits in einem anderen Thread. Warte...")
+        for _ in range(120):
+            time.sleep(1)
+            if os.path.exists(model_name) and os.path.exists(json_name):
+                return
+
+        
+    logger.info(f"Downloading Piper TTS model {model_name}... Bitte warten.")
+    try:
+        # Lade in temporaere Dateien herunter
+        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/{model_name}", model_name + ".tmp")
+        urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/thorsten/medium/{json_name}", json_name + ".tmp")
+        
+        # Umbenennen nach erfolgreichem Download (verhindert korrupte Modelle bei parallelem Zugriff)
+        os.rename(model_name + ".tmp", model_name)
+        os.rename(json_name + ".tmp", json_name)
+        
+        logger.info("Download abgeschlossen.")
+    except Exception as e:
+        logger.error(f"Fehler beim Herunterladen des Sprachmodells: {e}")
+
 async def generate_tts(text, filename):
     if not text or not text.strip(): return None
     
@@ -470,19 +501,24 @@ async def generate_tts(text, filename):
     
     cfg_live = load_config()
     try:
-        temp_mp3 = "tts_temp.mp3"
-        communicate = edge_tts.Communicate(
-            text=text,
-            voice=cfg_live["audio"]["voice"],
-            rate=cfg_live["audio"]["rate"]
-        )
-        await communicate.save(temp_mp3)
-        if os.path.exists(temp_mp3):
+        ensure_tts_model()
+        model_name = "de_DE-thorsten-medium.onnx"
+
+        temp_wav = "tts_temp.wav"
+        voice = PiperVoice.load(model_name)
+        
+        with wave.open(temp_wav, "wb") as wav_file:
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(voice.config.sample_rate)
+            voice.synthesize(text, wav_file)
+            
+        if os.path.exists(temp_wav):
             try:
-                sound = AudioSegment.from_file(temp_mp3)
+                sound = AudioSegment.from_file(temp_wav)
                 sound += cfg_live["audio"]["gain_db"]
                 sound.export(filename, format="wav")
-                os.remove(temp_mp3)
+                os.remove(temp_wav)
                 return filename
             except Exception as e:
                 logger.exception(f"FFmpeg fehlt oder Pydub Fehler! Verarbeitung abgebrochen. ()")
@@ -1493,6 +1529,9 @@ def start_socket_service():
 
 if __name__ == "__main__":
     logger.info("--- ALARM SERVER GESTARTET ---")
+    
+    # Sprachmodell beim Start sicherstellen, damit es offline verfügbar ist
+    threading.Thread(target=ensure_tts_model, daemon=True).start()
     
     t_socket = threading.Thread(target=start_socket_service, daemon=True)
     t_socket.start()

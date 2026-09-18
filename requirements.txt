@@ -3,7 +3,7 @@ uvicorn
 pydantic
 requests
 python-socketio[client]
-edge-tts
+piper-tts
 pydub
 pygame
 python-multipart
