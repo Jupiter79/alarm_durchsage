@@ -9,6 +9,13 @@ Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfach
 ## 👨‍🔧 Instandhaltung & Kontakt
 
 Ich (Sergio Huainigg) entwickle und betreue das System. Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**. Alternativ können neue Features oder Probleme jederzeit mittels eines Issues auf der GitHub-Seite eröffnet werden.
+---
+
+## 🔒 Datenschutz & Sicherheit
+
+Für dieses System bestehen **keinerlei Bedenken bezüglich des Datenschutzes**. 
+Die Einsatzdaten werden verschlüsselt von der FeuerwehrEinsatzInfo (FWEI) bezogen; die Umwandlung von Text zu Sprache (TTS) passiert **ausschließlich lokal und offline** auf dem lokalen Gerät (mittels `piper-tts`). 
+Es werden **keine Audiodaten, Einsatztexte oder Adressen** in die Cloud oder an Drittanbieter gesendet. Alles bleibt im eigenen Feuerwehrhaus!
 
 ---
 
