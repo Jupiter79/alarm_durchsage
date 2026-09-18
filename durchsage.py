@@ -454,7 +454,7 @@ def create_announcement_text(data: dict) -> str:
     if stichwort:
         stichwort_parts = stichwort.split()
         if len(stichwort_parts) >= 2 and stichwort_parts[1] == "VU":
-            stichwort_parts[1] = "Fau U"
+            stichwort_parts[1] = "Vau U"
             stichwort = " ".join(stichwort_parts)
     
     adresse_raw = data.get("additionalAddressInfo", "")
