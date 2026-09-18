@@ -1029,14 +1029,41 @@ function populateGongsSelect() {
     if (!select || !currentConfig || !currentConfig.gongs) return;
 
     const currentVal = select.value;
-
-    select.innerHTML = '<option value="0" selected>Keinen</option>';
+    
+    // Generiere neues HTML
+    let newHtml = '<option value="0">Keinen</option>';
     currentConfig.gongs.forEach(g => {
-        select.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+        newHtml += `<option value="${g.id}">${g.name}</option>`;
     });
+    
+    // Prüfe, ob sich die Optionen überhaupt geändert haben (vermeidet UI-Glitches / DOM-Trashing)
+    const temp = document.createElement('select');
+    temp.innerHTML = newHtml;
+    
+    let changed = false;
+    if (select.options.length !== temp.options.length) {
+        changed = true;
+    } else {
+        for (let i = 0; i < select.options.length; i++) {
+            if (select.options[i].value !== temp.options[i].value || select.options[i].text !== temp.options[i].text) {
+                changed = true;
+                break;
+            }
+        }
+    }
+    
+    if (!changed) return; // Nichts zu tun!
+
+    select.innerHTML = newHtml;
 
     if (Array.from(select.options).some(o => o.value === currentVal)) {
         select.value = currentVal;
+    } else {
+        select.value = "0";
+    }
+    
+    if (typeof window.updateFormFields === 'function') {
+        window.updateFormFields();
     }
 }
 
