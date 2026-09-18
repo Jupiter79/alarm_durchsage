@@ -434,10 +434,14 @@ async function checkSystemStatus() {
             } else {
                 document.getElementById('ffmpeg-warning').style.display = 'none';
                 const announceBtn = document.getElementById('submit-announce-btn');
-                if (announceBtn) {
+                if (announceBtn && announceBtn.disabled) {
                     announceBtn.disabled = false;
-                    announceBtn.innerHTML = 'Durchsage durchführen';
-                    announceBtn.classList.replace('btn-secondary', 'btn-primary');
+                    if (typeof window.updateFormFields === 'function') {
+                        window.updateFormFields();
+                    } else {
+                        announceBtn.innerHTML = 'Durchsage durchführen';
+                        announceBtn.classList.replace('btn-secondary', 'btn-primary');
+                    }
                 }
             }
         }
