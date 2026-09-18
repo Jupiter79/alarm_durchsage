@@ -452,10 +452,7 @@ def create_announcement_text(data: dict) -> str:
     
     # Spezifischer Fix für das Stichwort "VU", da Piper es sonst als "Fu" oder "Wu" ausspricht.
     if stichwort:
-        stichwort_parts = stichwort.split()
-        if len(stichwort_parts) >= 2 and stichwort_parts[1] == "VU":
-            stichwort_parts[1] = "Fau U"
-            stichwort = " ".join(stichwort_parts)
+        stichwort = re.sub(r'\bVU\b', 'Fau U', stichwort)
     
     adresse_raw = data.get("additionalAddressInfo", "")
     desc = normalize_text(data.get("description", ""))
