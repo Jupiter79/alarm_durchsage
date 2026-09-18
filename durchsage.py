@@ -570,7 +570,22 @@ async def generate_tts(text, filename):
         syn_config = SynthesisConfig(length_scale=length_scale)
 
         temp_wav = "tts_temp.wav"
-        voice = PiperVoice.load(model_name)
+        
+        try:
+            voice = PiperVoice.load(model_name)
+        except Exception as e:
+            logger.warning(f"Sprachmodell {model_name} ist defekt oder unvollständig. Erzwinge Neu-Download... ({e})")
+            if os.path.exists(model_name):
+                try: os.remove(model_name)
+                except: pass
+            
+            json_name = model_name + ".json"
+            if os.path.exists(json_name):
+                try: os.remove(json_name)
+                except: pass
+                
+            ensure_tts_model(voice_setting)
+            voice = PiperVoice.load(model_name)
         
         with wave.open(temp_wav, "wb") as wav_file:
             voice.synthesize_wav(text, wav_file, syn_config=syn_config)
@@ -1086,10 +1101,8 @@ def api_save_config(new_config: dict = Body(...)):
     new_voice = new_config.get("audio", {}).get("voice", "")
     
     if old_voice != new_voice:
-        logger.info(f"Stimme wurde von '{old_voice}' auf '{new_voice}' geändert. Überprüfe Download...")
-        success = ensure_tts_model(voice_setting=new_voice)
-        if not success:
-            raise HTTPException(status_code=400, detail="Das ausgewählte Sprachmodell konnte nicht heruntergeladen werden. Bitte Internetverbindung prüfen oder gültige Stimme wählen.")
+        logger.info(f"Stimme wurde von '{old_voice}' auf '{new_voice}' geändert. Starte Download falls nötig...")
+        ensure_tts_model(voice_setting=new_voice)
             
     save_config(new_config)
     return {"status": "ok"}
