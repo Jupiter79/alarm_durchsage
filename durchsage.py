@@ -422,6 +422,18 @@ def normalize_text(text: str) -> str:
     
     return " ".join(expand_units(text).split())
 
+# Globale Variable für das geladene Sprachmodell, um Ladezeiten zu minimieren
+global_voice = None
+global_voice_name = None
+
+def get_piper_voice(model_name: str):
+    global global_voice, global_voice_name
+    if global_voice is None or global_voice_name != model_name:
+        logger.info(f"Lade Sprachmodell {model_name} in den Arbeitsspeicher...")
+        global_voice = PiperVoice.load(model_name)
+        global_voice_name = model_name
+    return global_voice
+
 def format_stichwort(original: str) -> str:
     if not original: return ""
     
@@ -524,6 +536,13 @@ def ensure_tts_model(voice_setting=None):
         os.rename(json_name + ".tmp", json_name)
         
         logger.info("Download abgeschlossen.")
+        
+        # Modell direkt in den RAM vorladen
+        try:
+            get_piper_voice(model_name)
+        except:
+            pass
+            
         return True
     except Exception as e:
         logger.error(f"Fehler beim Herunterladen des Sprachmodells: {e}")
@@ -565,7 +584,7 @@ async def generate_tts(text, filename):
         temp_wav = "tts_temp.wav"
         
         try:
-            voice = PiperVoice.load(model_name)
+            voice = get_piper_voice(model_name)
         except Exception as e:
             logger.warning(f"Sprachmodell {model_name} ist defekt oder unvollständig. Erzwinge Neu-Download... ({e})")
             if os.path.exists(model_name):
@@ -578,7 +597,10 @@ async def generate_tts(text, filename):
                 except: pass
                 
             ensure_tts_model(voice_setting)
-            voice = PiperVoice.load(model_name)
+            global global_voice, global_voice_name
+            global_voice = None
+            global_voice_name = None
+            voice = get_piper_voice(model_name)
         
         with wave.open(temp_wav, "wb") as wav_file:
             voice.synthesize_wav(text, wav_file, syn_config=syn_config)
@@ -1606,8 +1628,18 @@ def start_socket_service():
 if __name__ == "__main__":
     logger.info("--- ALARM SERVER GESTARTET ---")
     
+    def init_background():
+        ensure_tts_model()
+        # Preload ins RAM, wenn es existiert
+        cfg = load_config()
+        voice_setting = cfg.get("audio", {}).get("voice", "de_DE-thorsten-medium")
+        model_name = voice_setting + ".onnx" if not voice_setting.endswith(".onnx") else voice_setting
+        if os.path.exists(model_name):
+            try: get_piper_voice(model_name)
+            except: pass
+            
     # Sprachmodell beim Start sicherstellen, damit es offline verfügbar ist
-    threading.Thread(target=ensure_tts_model, daemon=True).start()
+    threading.Thread(target=init_background, daemon=True).start()
     
     t_socket = threading.Thread(target=start_socket_service, daemon=True)
     t_socket.start()
