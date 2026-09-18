@@ -446,25 +446,16 @@ def format_stichwort(original: str) -> str:
             
     return expand_units(f"{kategorie} {o}!")
 
-def expand_acronyms(text: str) -> str:
-    if not text: return text
-    exclude = {
-        "AM", "IM", "IN", "AN", "ZU", "AB", "UM", "AUF", "VON", "MIT", "BEI", "ZUM", "ZUR", 
-        "DER", "DIE", "DAS", "UND", "IST", "EIN", "DEM", "DEN", "WO", "WIE", "WAS", "WER", 
-        "DA", "HIN", "HER", "NUR", "AUS", "VOR", "OB", "BIS", "ALS", "GAS", "ZUG", "LOK", 
-        "TOR", "TÜR", "BUS", "RAD", "ÖL", "AST", "ROT", "TOT", "SOG", "TUN", "HAT", "WAR", 
-        "NEU", "ALT", "GUT", "BAD", "SEE", "TAL", "ORT", "WEG", "UHR", "TAG", "MAI", 
-        "NOT", "RUF", "IHM", "IHN", "IHR", "MIR", "DIR", "WIR", "SIE", "ER", "ES", "DU", "ICH"
-    }
-    def replace_match(match):
-        word = match.group(0)
-        if word in exclude:
-            return word
-        return "-".join(list(word))
-    return re.sub(r'\b[A-ZÄÖÜ]{2,4}\b', replace_match, text)
 
 def create_announcement_text(data: dict) -> str:
     stichwort = format_stichwort(data.get("type", ""))
+    
+    # Spezifischer Fix für das Stichwort "VU", da Piper es sonst als "Fu" ausspricht.
+    if stichwort:
+        stichwort_parts = stichwort.split()
+        if len(stichwort_parts) >= 2 and stichwort_parts[1] == "VU":
+            stichwort_parts[1] = "V-U"
+            stichwort = " ".join(stichwort_parts)
     
     adresse_raw = data.get("additionalAddressInfo", "")
     desc = normalize_text(data.get("description", ""))
@@ -487,9 +478,7 @@ def create_announcement_text(data: dict) -> str:
     if gemeinde: parts.append(f"Gemeinde {gemeinde}!")
     if desc: parts.append(f"Information: {desc}")
 
-    final_text = " ".join(parts)
-    # Wende die dynamische Akronym-Erweiterung auf den gesamten Text an
-    return expand_acronyms(final_text)
+    return " ".join(parts)
 
 def ensure_tts_model(voice_setting=None):
     if not voice_setting:
