@@ -656,15 +656,15 @@ function renderConfigEditor() {
         { val: "de_DE-karlsson-low", label: "Karlsson (Männlich, Schnell)" },
         { val: "de_DE-eva_k-x_low", label: "Eva K (Weiblich, Sehr Schnell)" }
     ];
+    let voiceFound = voices.some(v => v.val === currentConfig.audio.voice);
+    if (!voiceFound) {
+        currentConfig.audio.voice = "de_DE-thorsten-medium";
+    }
+    
     let voiceOptionsHtml = '';
-    let voiceFound = false;
     voices.forEach(v => {
-        if (v.val === currentConfig.audio.voice) voiceFound = true;
         voiceOptionsHtml += `<option value="${v.val}" ${v.val === currentConfig.audio.voice ? 'selected' : ''}>${v.label}</option>`;
     });
-    if (!voiceFound && currentConfig.audio.voice) {
-        voiceOptionsHtml += `<option value="${currentConfig.audio.voice}" selected>${currentConfig.audio.voice} (Alte Konfiguration)</option>`;
-    }
 
     html += `
         <div class="mb-3">

@@ -48,7 +48,7 @@ def load_config():
             "ui": {"port": 8122, "password": "122", "user_hash": "", "password_changed": False, "alarm_mode": "full"},
             "credentials": {"base_url": "https://feuerwehr.einsatz.or.at", "username": "", "password": ""},
             "connection": {"reconnect_hours": 19},
-            "audio": {"voice": "de_DE-thorsten-medium", "gain_db": 9, "rate": "-10%", "gong_pause_sec": 1, "output_device": ""},
+            "audio": {"voice": "de_DE-thorsten-medium", "gain_db": 9, "rate": "-30%", "gong_pause_sec": 1, "output_device": ""},
             "logging": {"file": "log.json", "retention_days": 365},
             "gongs": [
                 {"id": 1, "name": "Einsatz", "is_alarm": True},
@@ -87,7 +87,17 @@ def load_config():
     config_changed = False
     
     voice = c.get("audio", {}).get("voice", "")
-    if "KillianNeural" in voice or "KatjaNeural" in voice or not voice.startswith("de_DE-"):
+    valid_voices = [
+        "de_DE-thorsten-medium",
+        "de_DE-thorsten-high",
+        "de_DE-thorsten-low",
+        "de_DE-kerstin-low",
+        "de_DE-pavoque-low",
+        "de_DE-ramona-low",
+        "de_DE-karlsson-low",
+        "de_DE-eva_k-x_low"
+    ]
+    if voice not in valid_voices:
         if "audio" not in c: c["audio"] = {}
         c["audio"]["voice"] = "de_DE-thorsten-medium"
         config_changed = True
