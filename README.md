@@ -1,8 +1,10 @@
 # 🚒 Feuerwehr Alarmdurchsage Server
+<img src="https://repository-images.githubusercontent.com/1300434201/d2036409-19cc-4129-9d8c-eb0a8fe46c80">
 
-Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfachen Worten, was dieses System macht, wie es dir und deiner Feuerwehr im Einsatzfall hilft und wie man es bedient.
+## Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfachen Worten, was dieses System macht, wie es dir und deiner Feuerwehr im Einsatzfall hilft und wie man es bedient.
 
-<img width="1339" height="702" alt="image" src="https://github.com/user-attachments/assets/63941f2a-043c-4ad1-9797-6b7efd7d1730" />
+
+<img src="https://github.com/user-attachments/assets/63941f2a-043c-4ad1-9797-6b7efd7d1730" />
 
 ---
 
