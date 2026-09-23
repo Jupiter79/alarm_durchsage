@@ -1593,6 +1593,24 @@ def api_network_connect(req: NetworkConnectRequest):
                 
     raise HTTPException(status_code=400, detail="Unbekannter Modus")
 
+from fastapi.responses import HTMLResponse
+
+@app.get("/")
+@app.get("/index.html")
+def serve_index():
+    cfg_live = load_config()
+    version = cfg_live.get("version", "v1.0.0")
+    
+    html_path = os.path.join("static", "index.html")
+    if not os.path.exists(html_path):
+        raise HTTPException(status_code=404, detail="index.html nicht gefunden")
+        
+    with open(html_path, "r", encoding="utf-8") as f:
+        content = f.read()
+        
+    content = content.replace("{{VERSION}}", version)
+    return HTMLResponse(content=content)
+
 # Statische Dateien einbinden (muss am Ende stehen!)
 os.makedirs("static", exist_ok=True)
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
