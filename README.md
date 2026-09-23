@@ -9,7 +9,10 @@ Willkommen beim Alarm Durchsage Server! Dieses Dokument erklärt in ganz einfach
 ## 👨‍🔧 Instandhaltung & Kontakt
 
 Falls es Probleme, Vorschläge oder Fragen gibt, bitte per E-Mail an mich wenden: **kamerafotos32@gmail.com**. Alternativ können neue Features oder Probleme jederzeit mittels eines Issues auf der GitHub-Seite eröffnet werden.
----
+
+#### ⚠️ DISCLAIMER
+Dieses Projekt ist eine Eigenentwicklung von mir. Es steht in absolut keinem Zusammenhang mit dem KLFV, der Feuerwehr Spittal/Drau oder der Feuerwehreinsatzinfo.
+Der Gebrauch dieser Anwendung erfolgt auf eigene Gefahr und es wird keine Haftung für eventuelle Schäden übernommen, die durch die Verwendung dieser Anwendung entstehen könnten. Ebenfalls wird keine Garantie für die Funktionalität oder Zuverlässigkeit dieses Projekts übernommen.
 
 ## 🔒 Datenschutz & Sicherheit
 
