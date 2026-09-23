@@ -137,3 +137,7 @@ Du musst kein Netzwerkingenieur sein, um das System zu bedienen!
 * **Test-Einsatz:** Löse einen vollständigen Probealarm aus, um Lautstärke und Verständlichkeit in Ruhe zu testen.
 * **Historie:** Verfolge alle vergangenen Einsätze und Durchsagen nach.
 * **Einstellungen:** Konfiguriere Wiederholungsintervalle, Lautstärke, Stimme und das Abkürzungs-Wörterbuch bequem über den Browser.
+
+---
+## Flowchart Logik
+<img src="https://github.com/user-attachments/assets/611c7fc4-5e50-4cc1-92d0-694440fc0725" />
