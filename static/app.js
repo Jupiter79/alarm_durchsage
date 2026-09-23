@@ -1247,24 +1247,29 @@ async function runUpdate() {
     if (!confirm("Möchtest du das Update jetzt installieren? Der Server wird dabei neu gestartet.")) return;
 
     const btn = document.getElementById('btn-run-update');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Wird installiert...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Installiert... (Lädt automatisch neu)';
     btn.disabled = true;
 
     try {
         await fetch('/api/update_run', { method: 'POST' });
 
         let attempts = 0;
+        let wentDown = false;
         const checkAlive = setInterval(async () => {
             attempts++;
             try {
                 const res = await fetch('/api/auth_status');
                 if (res.ok) {
-                    clearInterval(checkAlive);
-                    window.location.reload();
+                    if (wentDown) {
+                        clearInterval(checkAlive);
+                        window.location.reload();
+                    }
                 }
-            } catch (e) { }
+            } catch (e) {
+                wentDown = true;
+            }
 
-            if (attempts > 30) {
+            if (attempts > 60) {
                 clearInterval(checkAlive);
                 alert("Update dauerte zu lange. Bitte lade die Seite manuell neu.");
             }
