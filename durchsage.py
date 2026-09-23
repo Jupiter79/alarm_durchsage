@@ -252,6 +252,7 @@ active_sessions = {}
 
 def ensure_mixer():
     if not pygame.mixer.get_init():
+        pygame.mixer.pre_init(44100, -16, 2, 4096)
         try:
             cfg_live = load_config()
             audio_device = cfg_live.get("audio", {}).get("output_device", "").strip()
@@ -263,7 +264,7 @@ def ensure_mixer():
                     pygame.mixer.init()
             else:
                 pygame.mixer.init()
-            pygame.mixer.music.set_volume(1)
+            # Pygame mixer volume for sounds
             logger.info(f"Audio-System initialisiert. Device: {audio_device or 'Standard'}")
         except Exception as e:
             logger.exception(f"Audio Init endgültig fehlgeschlagen: ")
@@ -639,13 +640,13 @@ def play_file_blocking(filepath):
     ensure_mixer()
     if not pygame.mixer.get_init(): return
     try:
-        pygame.mixer.music.load(filepath)
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
+        # Verwende Sound anstelle von music, um das Audio komplett in den RAM zu laden.
+        # Dies verhindert abgehakte Wiedergabe (Stottern) auf schwachen Systemen (z.B. Raspberry Pi)
+        # wenn die CPU / SD-Karte ausgelastet ist.
+        sound = pygame.mixer.Sound(filepath)
+        channel = sound.play()
+        while channel.get_busy():
             time.sleep(0.1)
-        try: pygame.mixer.music.unload()
-        except Exception as e:
-            logger.exception("Unhandled exception ignored:")
     except Exception as e:
         logger.exception(f"Playback Fehler bei {filepath}: ")
 
@@ -658,7 +659,7 @@ def worker_loop():
             stop_event.clear()
 
             if item == "CLEAR":
-                if pygame.mixer.get_init(): pygame.mixer.music.stop()
+                if pygame.mixer.get_init(): pygame.mixer.stop()
                 alarm_queue.task_done()
                 continue
             
