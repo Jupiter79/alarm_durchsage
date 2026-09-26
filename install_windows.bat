@@ -219,7 +219,4 @@ echo Der Server läuft nun unsichtbar im Hintergrund.
 echo Du kannst das Webinterface im Browser aufrufen unter:
 echo http://localhost:8122
 echo.
-echo TIPP: Es wird empfohlen, den PC bei Gelegenheit einmal neu zu starten,
-echo um zu testen, ob der automatische Start (Autostart) korrekt funktioniert.
-echo.
 pause
