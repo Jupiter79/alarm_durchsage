@@ -538,6 +538,14 @@ def ensure_tts_model(voice_setting=None):
         
     logger.info(f"Downloading Piper TTS model {model_name}... Bitte warten.")
     try:
+        import ssl
+        import certifi
+        try:
+            # Verwende die von pip installierte Zertifikatsdatenbank (certifi) fuer alle Downloads
+            ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
+        except Exception as e:
+            logger.warning(f"Konnte Zertifikatsdatenbank nicht laden: {e}")
+            
         # Lade in temporaere Dateien herunter
         urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/{voice_id}/{quality}/{model_name}", model_name + ".tmp")
         urllib.request.urlretrieve(f"https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/de/de_DE/{voice_id}/{quality}/{json_name}", json_name + ".tmp")
