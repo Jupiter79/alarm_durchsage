@@ -140,4 +140,5 @@ Du musst kein Netzwerkingenieur sein, um das System zu bedienen!
 
 ---
 ## Flowchart Logik
-<img src="https://github.com/user-attachments/assets/611c7fc4-5e50-4cc1-92d0-694440fc0725" />
+<img src="https://github.com/user-attachments/assets/a5ad57c6-a45e-430b-9c23-02856a5ade36" />
+
