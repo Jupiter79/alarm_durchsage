@@ -5,14 +5,30 @@ echo "====================================================="
 echo " Alarmdurchsage - Deinstallation"
 echo "====================================================="
 
-INSTALL_DIR="$HOME/alarm_durchsage"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+
+if [ -f "$SCRIPT_DIR/docker-compose.yml" ]; then
+    INSTALL_DIR="$SCRIPT_DIR"
+else
+    INSTALL_DIR="$HOME/alarm_durchsage"
+fi
+
+# Compose-Befehl ermitteln
+COMPOSE_CMD=""
+if docker compose version &> /dev/null; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+elif command -v podman-compose &> /dev/null; then
+    COMPOSE_CMD="podman-compose"
+fi
 
 if [ -d "$INSTALL_DIR" ]; then
-    echo "Stoppe Docker Container und lösche Images..."
+    echo "Stoppe Container und lösche Images..."
     cd "$INSTALL_DIR"
-    if command -v docker &> /dev/null; then
-        sudo docker compose --profile pi down --rmi all -v || true
-        sudo docker compose --profile windows down --rmi all -v || true
+    if [ -n "$COMPOSE_CMD" ]; then
+        sudo $COMPOSE_CMD --profile pi down --rmi all -v || true
+        sudo $COMPOSE_CMD --profile windows down --rmi all -v || true
     fi
 else
     echo "Installationsverzeichnis $INSTALL_DIR nicht gefunden."
@@ -26,7 +42,7 @@ echo "Entferne Systemdienst (Network-Fix) falls vorhanden..."
 sudo systemctl stop alarm-network-fix.service 2>/dev/null || true
 sudo systemctl disable alarm-network-fix.service 2>/dev/null || true
 sudo rm -f /etc/systemd/system/alarm-network-fix.service 2>/dev/null || true
-sudo systemctl daemon-reload
+sudo systemctl daemon-reload 2>/dev/null || true
 
 echo "====================================================="
 echo " Deinstallation abgeschlossen!"
